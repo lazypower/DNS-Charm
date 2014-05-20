@@ -1,0 +1,19 @@
+name: bind
+summary: Deploys a BIND DNS server
+maintainer: charles <charles.butler@canonical.com>
+description: |
+  Deploys BIND9, and exposes a programmable API to set DNS records
+categories:
+  - Applications
+subordinate: false
+provides:
+  programmable:
+    interface: DNS
+  generated:
+    interface: DNS
+requires:
+  requires-relation:
+    interface: interface-name
+peers:
+  peer-relation:
+    interface: interface-name
