@@ -1,8 +1,31 @@
-#!/bin/bash
-# Here do anything needed to install the service
-# i.e. apt-get install -y foo  or  bzr branch http://myserver/mycode /srv/webroot
-# Make sure this hook exits cleanly and is idempotent, common problems here are
-# failing to account for a debconf question on a dependency, or trying to pull
-# from github without installing git first.
+#!/usr/bin/python
 
-apt-get install -y bind
+import urllib2
+
+from charmhelpers.core.hookenv import log
+from charmhelpers.fetch import (
+    apt_update,
+    apt_install,
+)
+from charmhelpers.contrib.python import debug
+
+def install_common():
+    log("Preparing for API Wrapper installation")
+    apt_update(fatal=True)
+    apt_install(packages=[
+            'git-core'
+        ], fatal=True)
+
+
+def install():
+    debug.set_trace(port=12345)
+    log("Preparing for BIND installation")
+    apt_update(fatal=True)
+    apt_install(packages=[
+            'bind9'
+        ], fatal=True)
+
+
+
+if __name__ == '__main__':
+    install()

@@ -1,14 +1,9 @@
 options:
-  string-option:
-    type: string
-    default: "Default Value"
-    description: "A short description of the configuration option"
-  boolean-option:
+  assume_provider:
     type: boolean
-    default: False
-    description: "A short description of the configuration option"
-  int-option:
-    type: int
-    default: 9001
-    description: "A short description of the configuration option"
-
+    default: True
+    description: "Assume a BIND server isntead of Recursive DNS provider"
+  canonical_domain:
+    type: string
+    default: orangebox.com
+    description: "Base Canonical Domain name for environment"
