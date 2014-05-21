@@ -12,6 +12,9 @@ test:
 	@echo "Starting tests..."
 	@nosetests tests --with-coverage --cover-package=hooks
 
+lint:
+	@find $(sources) -type f \( -iname '*.py' ! -iwholename './lib/*' \) -print0 | xargs -r0 flake8
+
 clean:
 	@find . -name \*.pyc -delete
 	@find . -name '*.bak' -delete
