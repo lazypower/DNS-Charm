@@ -1,19 +1,12 @@
 #!/usr/bin/python
 
-import urllib2
-
-from charmhelpers.core.hookenv import log
-from charmhelpers.fetch import (
-    apt_update,
-    apt_install,
-)
-
 from common import (
     sanity_check,
-    host_ip,
+    install_bind,
 )
 
-# Does not assume offline environment by default 
+
+# Does not assume offline environment by default
 # TODO: Make offlineable with cached packages
 def install():
     sanity_check()
