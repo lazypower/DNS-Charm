@@ -10,7 +10,7 @@ bin/charm_helpers_sync.py:
 
 test:
 	@echo "Starting tests..."
-	@nosetests tests --with-coverage --cover-package=hooks
+	@nosetests tests --with-coverage --cover-package=hooks --ignore-files=charmhelpers
 
 clean:
 	@find . -name \*.pyc -delete
