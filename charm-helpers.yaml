@@ -1,6 +1,6 @@
-branch: lp:~niedbalski/charm-helpers/python-set_trace
+branch: lp:charm-helpers
 destination: hooks/charmhelpers
 include:
     - core
     - fetch
-    - contrib/python
+    - contrib/network

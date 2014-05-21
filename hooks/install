@@ -7,24 +7,17 @@ from charmhelpers.fetch import (
     apt_update,
     apt_install,
 )
-from charmhelpers.contrib.python import debug
 
-def install_common():
-    log("Preparing for API Wrapper installation")
-    apt_update(fatal=True)
-    apt_install(packages=[
-            'git-core'
-        ], fatal=True)
+from common import (
+    sanity_check,
+    host_ip,
+)
 
-
+# Does not assume offline environment by default 
+# TODO: Make offlineable with cached packages
 def install():
-    debug.set_trace(port=12345)
-    log("Preparing for BIND installation")
-    apt_update(fatal=True)
-    apt_install(packages=[
-            'bind9'
-        ], fatal=True)
-
+    sanity_check()
+    install_bind()
 
 
 if __name__ == '__main__':
