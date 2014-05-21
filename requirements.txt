@@ -2,4 +2,3 @@ nose
 flake8
 mock
 coverage
-pyyaml
