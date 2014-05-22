@@ -7,10 +7,12 @@ from common import (
 
 
 # Does not assume offline environment by default
-# TODO: Make offlineable with cached packages
 def install():
-    if sanity_check():
-        install_bind()
+    if not sanity_check():
+        return 0
+
+    # TODO: Check offline, install fatpack
+    install_bind()
 
 
 if __name__ == '__main__':
