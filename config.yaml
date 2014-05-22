@@ -3,3 +3,7 @@ options:
     type: string
     default: ""
     description: "Base Canonical Domain name for environment"
+  provider:
+    type: string
+    default: "bind"
+    description: "Used to specify the provider to deploy/consume for DNS management"
