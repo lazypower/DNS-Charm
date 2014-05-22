@@ -76,6 +76,7 @@ def probe_dhcp():
     for dc in conf:
         with open(dc) as f:
             # dhcp_leases.append(parse_dhcp_lease(f.readlines()))
+            pass
 
 
 # # Parse passed array of file contents.
@@ -88,18 +89,6 @@ def probe_dhcp():
 # ###########
 # BIND tasks
 # ###########
-
-def install():
-    sanity_check()
-
-    log("Preparing for BIND installation")
-    apt_update(fatal=True)
-    apt_install(packages=[
-        'bind9',
-        'dnsutils',
-        'python-dnspython'
-    ], fatal=True)
-
 
 def install_bind():
     sanity_check()
