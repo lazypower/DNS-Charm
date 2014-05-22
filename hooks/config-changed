@@ -1,32 +1,20 @@
 #!/usr/bin/python
 
-from subprocess import call
-from charmhelpers.core.hookenv import (
-    log,
-    config,
-)
 from common import (
-    host_ip,
+    probe_dhcp,
+    log,
+    unit_get,
 )
-
-
-def rerun_installer():
-    try:
-        call(['hooks/install'])
-    except:
-        log('Failed re-running the installation hook.')
 
 
 def template_deployment():
-    if config()['network_dhcp']:
+    dhcp_config = probe_dhcp()
+    if dhcp_config:
         print "We have a DHCP based host, scrape configuration"
-        log('Found HOST IP of %s' % host_ip(), level='INFO')
+        log('Found HOST IP of %s' % unit_get('public-address'), level='INFO')
 
 
 def run_bind_tasks():
-    # We dont know if we are updating dependencies
-    # so re-run the install hook.
-    rerun_installer()
     template_deployment()
 
 
