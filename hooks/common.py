@@ -3,7 +3,11 @@ import sys
 import urllib2
 
 # Add charmhelpers to the system path.
-sys.path.insert(0, os.path.abspath(os.path.join('..', 'lib')))
+try:
+    sys.path.insert(0, os.path.abspath(os.path.join(os.environ['CHARM_DIR'],
+                                                    'lib')))
+except:
+    sys.path.insert(0, os.path.abspath(os.path.join('..', 'lib')))
 
 
 from charmhelpers.core.hookenv import (
