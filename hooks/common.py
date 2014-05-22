@@ -13,6 +13,7 @@ except:
 from charmhelpers.core.hookenv import (
     log,
     config,
+    unit_get,
 )
 from charmhelpers.core.host import (
     mkdir,
@@ -38,7 +39,6 @@ def sanity_check():
 
 # Create Configuration Directories for local Bind9 Server
 def make_bind_store():
-    mkdir('/etc/bind')
     mkdir('/etc/bind/zones')
 
 
@@ -65,6 +65,24 @@ def am_i_online():
     except urllib2.URLError:
         pass
     return False
+
+
+# Determine if we are a DHCP based client. If so we need to scrape some
+# information from the DHCP leases to properly configure Bind9
+def probe_dhcp():
+    dhcpd = os.path.join(os.path.sep, 'var', 'lib', 'dhcp')
+    conf = os.listdir(dhcpd)
+    dhcp_leases = []
+    for dc in conf:
+        with open(dc) as f:
+            # dhcp_leases.append(parse_dhcp_lease(f.readlines()))
+
+
+# # Parse passed array of file contents.
+# def parse_dhcp_lease(dhcpconf):
+#     if len(dhcpconf) != 4:
+#         return
+
 
 
 # ###########
