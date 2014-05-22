@@ -19,17 +19,13 @@ from charmhelpers.fetch import (
 )
 
 
-# Convenience Methods - wrap charmhelpers
-def lg(msg, level='INFO'):
-    log(msg, level)
-
-
 def sanity_check():
     if not config()['canonical_domain']:
         log("No Canonical Domain specified - Aborting until configured")
         # It's reasonable to assume we're not doing anything useful at this
         # point, as we are unconfigured. Abort doing *anything*
-        exit(0)
+        return False
+    return True
 
 
 # ###########
@@ -44,13 +40,13 @@ def make_bind_store():
 
 # Parse existing nameservers from resolv.conf
 def existing_nameservers():
-    contents = []
     dns_servers = []
     with open('/etc/resolv.conf') as f:
         contents = f.readlines()
-    for line in contents:
-        if line.find('nameserver:') != -1:
-            dns_servers.append(line.replace('nameserver: ', ''))
+        print contents
+        for line in contents:
+            if line.find('nameserver') != -1:
+                dns_servers.append(line.replace('nameserver ', '').rstrip())
 
     return dns_servers
 
