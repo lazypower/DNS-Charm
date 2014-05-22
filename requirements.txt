@@ -2,3 +2,6 @@ nose
 flake8
 mock
 coverage
+dnspython
+easyzone
+publicsuffix
