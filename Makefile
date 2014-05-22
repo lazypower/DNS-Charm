@@ -12,6 +12,10 @@ test:
 	@echo "Starting tests..."
 	@nosetests tests --with-coverage --cover-package=hooks
 
+test_contrib:
+	@echo "Testing Contributed Modules"
+	@nosetests contrib/tests --with-coverage --cover-package=contrib
+
 lint:
 	@find $(sources) -type f \( -iname '*.py' ! -iwholename './lib/*' \) -print0 | xargs -r0 flake8
 
