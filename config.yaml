@@ -1,21 +1,5 @@
 options:
-  assume_provider:
-    type: boolean
-    default: True
-    description: "Assume a BIND server isntead of Recursive DNS provider"
   canonical_domain:
     type: string
     default: ""
     description: "Base Canonical Domain name for environment"
-  network_dhcp:
-    type: boolean
-    default: True
-    description: If DHCP network is specified, ignores the ip_gateway and ip_network configuration options.
-  ip_gateway:
-    type: string
-    default: 10.0.3.1
-    description: IPV4 Address of our gateway node for external communication
-  ip_network:
-    type: string
-    default: 10.0.3.0
-    description: IPV4 CIDR range of the network
