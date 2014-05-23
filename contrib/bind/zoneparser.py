@@ -1,4 +1,4 @@
-from . import zone
+from .zone import Zone
 
 
 class ZoneParser(object):
@@ -6,7 +6,8 @@ class ZoneParser(object):
     def __init__(self, file_handle=None):
         if file_handle:
             self.contents = self.from_file(file_handle)
-            self.zone = zone()
+        self.zone = Zone()
+        self.implemented_records = self.zone.contents.keys()
 
     def from_file(self, file_handle):
         contents = []
@@ -16,9 +17,8 @@ class ZoneParser(object):
         return contents
 
     def from_dict(self, dns_records):
-        if not self.__validate_attributes():
-            raise KeyError("Failed to locate all necessary attributes")
+        self.__validate_attributes(dns_records)
 
     def __validate_attributes(self, configuration):
-        for key in configuration.iteritems():
-            print key
+            if configuration['type'] not in self.implemented_records:
+                raise KeyError("Unknown key %s" % configuration['type'])

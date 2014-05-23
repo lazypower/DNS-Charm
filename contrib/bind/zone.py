@@ -1,7 +1,10 @@
 
-class Zone(object):
 
-    # Supports an incomplete SPEC of DNS Zones
+# Supports an incomplete SPEC of DNS Zone entrys
+class Zone(object):
+    # TODO: Add Validation
+    # TODO: Compare with RFC
+
     def __init__(self):
         self.contents = {
             'a':  [],
@@ -85,7 +88,7 @@ class Zone(object):
             return self.contents['srv']
         else:
             self.contents['srv'].append(value)
-            return self.conents['srv']
+            return self.contents['srv']
 
     def txt(self, value=None):
         if not value:
