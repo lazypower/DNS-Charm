@@ -14,7 +14,7 @@ test:
 
 test_contrib:
 	@echo "Testing Contributed Modules"
-	@nosetests contrib/tests --with-coverage --cover-package=contrib
+	@nosetests contrib/tests --with-coverage
 
 lint:
 	@find $(sources) -type f \( -iname '*.py' ! -iwholename './lib/*' \) -print0 | xargs -r0 flake8
