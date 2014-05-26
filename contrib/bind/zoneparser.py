@@ -129,7 +129,7 @@ class ZoneParser(object):
         for entry in self.contents:
             line = entry.split('\t')
             logging.info(line)
-            dclass = line[5]
+            dclass = line[5].strip()
             for case in switch(dclass):
                 if case('A'):
                     self.a_from_array(line)
