@@ -77,7 +77,10 @@ class ZoneParser(object):
             self.failed_check()
         ttl = data[4].strip().split(' IN')[0]
         addr = data[6].strip()
-        alias = self.tldxtr(data[0].strip()).subdomain
+        try:
+            alias = self.tldxtr(data[0].strip()).subdomain
+        except:
+            alias = "@"
         parsed = {'ttl': ttl, 'addr': addr, 'alias': alias}
         self.zone.a(parsed)
 
@@ -86,14 +89,21 @@ class ZoneParser(object):
             self.failed_check()
         ttl = data[4].strip().split(' IN')[0]
         addr = data[6].strip()
-        alias = self.tldxtr(data[0].strip()).subdomain
+        try:
+            alias = self.tldxtr(data[0].strip()).subdomain
+        except:
+            alias = "@"
         parsed = {'ttl': ttl, 'addr': addr, 'alias': alias}
         self.zone.aaaa(parsed)
 
     def cname_from_array(self, data):
         if len(data) < 6:
             self.failed_check()
-        ipdb.set_trace()
+        alias = self.tldxtr(data[0].strip()).subdomain
+        ttl = data[4].strip().split(' IN')[0]
+        addr = data[6].strip()
+        parsed = {'ttl': ttl, 'addr': addr, 'alias': alias}
+        self.zone.cname(parsed)
 
     def ns_from_array(self, data):
         if len(data) < 6:
@@ -107,16 +117,25 @@ class ZoneParser(object):
     def soa_from_array(self, data):
         if len(data) < 6:
             self.failed_check()
-        logging.info(data)
         agg = data[6].strip().split(' ')
+        logging.info("agg: %s" % agg)
         ttl = data[4].strip().split(' IN')[0]
         addr = agg[0]
         alias = agg[1]
         serial = agg[2]
         refresh = agg[3]
-        update_retry = agg[4]
-        expiry = agg[5]
-        minimum = agg[6]
+        try:
+            update_retry = agg[4]
+        except:
+            update_retry = None
+        try:
+            expiry = agg[5]
+        except:
+            expiry = None
+        try:
+            minimum = agg[6]
+        except:
+            minimum = None
         parsed = {'ttl': ttl, 'addr': addr, 'alias': alias, 'serial': serial,
                   'refresh': refresh, 'update-retry': update_retry,
                   'expiry': expiry, 'minimum': minimum}
@@ -128,7 +147,6 @@ class ZoneParser(object):
 
         for entry in self.contents:
             line = entry.split('\t')
-            logging.info(line)
             dclass = line[5].strip()
             for case in switch(dclass):
                 if case('A'):
@@ -147,6 +165,7 @@ class ZoneParser(object):
                     self.soa_from_array(line)
                     break
                 if case():
+                    pass
                     logging.warning('Unable to match type %s' % dclass)
 
 

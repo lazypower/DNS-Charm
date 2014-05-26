@@ -1,4 +1,4 @@
-
+import jinja2
 
 # Supports an incomplete SPEC of DNS Zone entrys
 class Zone(object):
@@ -96,3 +96,10 @@ class Zone(object):
         else:
             self.contents['txt'].append(value)
             return self.contents['txt']
+
+    # ############
+    # Template Methods
+    # ############
+
+    def to_file(self):
+        
