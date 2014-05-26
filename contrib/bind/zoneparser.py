@@ -65,7 +65,7 @@ class ZoneParser(object):
     # #######################################
     # Parsing Array to Zone Dictionary - this is going
     # to be a bit messy, and specific to loading
-    # from the named-checkzone utility
+    # from the named-checkzone utility - this is brittle
     # #######################################
 
     def failed_check(self):
@@ -93,27 +93,30 @@ class ZoneParser(object):
     def cname_from_array(self, data):
         if len(data) < 6:
             self.failed_check()
-        pass
+        ipdb.set_trace()
 
     def ns_from_array(self, data):
         if len(data) < 6:
             self.failed_check()
         ttl = data[4].strip().split(' IN')[0]
-        owner_name = data[0]
+        owner_name = "%s." % self.domain
         alias = data[6].strip()
+        parsed = {'ttl': ttl, 'alias': alias, 'owner-name': owner_name}
+        self.zone.ns(parsed)
 
     def soa_from_array(self, data):
         if len(data) < 6:
             self.failed_check()
         logging.info(data)
+        agg = data[6].strip().split(' ')
         ttl = data[4].strip().split(' IN')[0]
-        addr = data[6].strip().split(' ')[0]
-        alias = data[6].strip().split(' ')[1]
-        serial = data[6].strip().split(' ')[2]
-        refresh = data[6].strip().split(' ')[3]
-        update_retry = data[6].strip().split(' ')[4]
-        expiry = data[6].strip().split(' ')[5]
-        minimum = data[6].strip().split(' ')[6]
+        addr = agg[0]
+        alias = agg[1]
+        serial = agg[2]
+        refresh = agg[3]
+        update_retry = agg[4]
+        expiry = agg[5]
+        minimum = agg[6]
         parsed = {'ttl': ttl, 'addr': addr, 'alias': alias, 'serial': serial,
                   'refresh': refresh, 'update-retry': update_retry,
                   'expiry': expiry, 'minimum': minimum}
@@ -125,6 +128,7 @@ class ZoneParser(object):
 
         for entry in self.contents:
             line = entry.split('\t')
+            logging.info(line)
             dclass = line[5]
             for case in switch(dclass):
                 if case('A'):
