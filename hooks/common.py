@@ -1,6 +1,7 @@
 import os
 import sys
 import urllib2
+from publicsuffix import PublicSuffixList
 
 # Add charmhelpers to the system path.
 try:
@@ -67,16 +68,30 @@ def am_i_online():
     return False
 
 
-# Determine if we are a DHCP based client. If so we need to scrape some
-# information from the DHCP leases to properly configure Bind9
-def probe_dhcp():
-    dhcpd = os.path.join(os.path.sep, 'var', 'lib', 'dhcp')
-    conf = os.listdir(dhcpd)
-    dhcp_leases = []
-    for dc in conf:
-        with open(dc) as f:
-            # dhcp_leases.append(parse_dhcp_lease(f.readlines()))
-            pass
+# #####
+# Bind Management Tasks
+# #####
+
+# Leverage dnspython to create a zone file
+def create_zone(domain, ttl=3600):
+    # always return canonical domain + TLD - if someone gets funky and
+    # passes mail.myexample.co.uk - we only care about myexample.co.uk
+    psl = PublicSuffixList()
+    canonical = psl.get_public_suffix(domain)
+
+    
+
+
+# # Determine if we are a DHCP based client. If so we need to scrape some
+# # information from the DHCP leases to properly configure Bind9
+# def probe_dhcp():
+#     dhcpd = os.path.join(os.path.sep, 'var', 'lib', 'dhcp')
+#     conf = os.listdir(dhcpd)
+#     dhcp_leases = []
+#     for dc in conf:
+#         with open(dc) as f:
+#             # dhcp_leases.append(parse_dhcp_lease(f.readlines()))
+#             pass
 
 
 # # Parse passed array of file contents.
