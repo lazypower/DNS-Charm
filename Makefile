@@ -8,15 +8,15 @@ sync-charm-helpers: bin/charm_helpers_sync.py
 bin/charm_helpers_sync.py:
 	@bzr cat lp:charm-helpers/tools/charm_helpers_sync/charm_helpers_sync.py > bin/charm_helpers_sync.py
 
-test:
+test: clean
 	@echo "Starting tests..."
 	@nosetests tests --with-coverage --cover-package=hooks
 
-test_contrib:
+test_contrib: clean
 	@echo "Testing Contributed Modules"
-	@nosetests contrib/tests --with-coverage
+	@nosetests contrib/tests --with-coverage --cover-package=contrib
 
-lint:
+lint: clean
 	@find $(sources) -type f \( -iname '*.py' ! -iwholename './lib/*' \) -print0 | xargs -r0 flake8
 
 clean:
