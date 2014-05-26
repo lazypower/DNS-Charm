@@ -3,6 +3,7 @@ import os
 import random
 import subprocess
 import string
+import tldextract
 from .zone import Zone
 
 import ipdb
@@ -13,11 +14,11 @@ import ipdb
 # Anything loaded from file here will be passed through this utility.
 # If it fails to normalize/parse the file, then the operation will fail.
 
-# I'm open to suggestions on how to do this outside of relying on binds
-# wrapping normalizer, as Ideally this should be a bit more robust than
-# that.
+# I'm open to suggestions on how to do this outside of relying on bind's
+# wrapping normalizer
 
 logging.basicConfig(level=logging.INFO)
+
 
 class ZoneParser(object):
 
@@ -25,8 +26,11 @@ class ZoneParser(object):
         self.zone = Zone()
         self.domain = domain
         self.implemented_records = self.zone.contents.keys()
+        self.tldxtr = tldextract.extract
         if file_handle:
+            self.zonefile = file_handle
             self.contents = self.from_file(file_handle)
+            self.array_to_zone()
 
     def from_file(self, file_handle):
         contents = []
@@ -36,19 +40,19 @@ class ZoneParser(object):
                 contents.append(line)
         return contents
 
+    # ####################################
+    # Utility Methods
+    # ####################################
+
+    # Create an intermediate file to warehouse the normalized config
     def __normalize_contents(self, file_handle):
         if os.path.exists(file_handle):
             rando = self.__id_generator(8)
             rando_filepath = "/tmp/%s" % rando
-            logging.info('created temporary file %s' % rando_filepath)
             subprocess.call(['named-checkzone', '-o', rando_filepath,
                              self.domain, file_handle])
+            logging.info('created temporary file %s' % rando_filepath)
             return rando_filepath
-
-    # TODO: Make this do something
-    def from_dict(self, dns_records):
-        self.__validate_attributes(dns_records)
-
 
     def __validate_attributes(self, configuration):
             if configuration['type'] not in self.implemented_records:
@@ -57,3 +61,108 @@ class ZoneParser(object):
     def __id_generator(self, size=6):
         chars = string.ascii_uppercase + string.digits
         return ''.join(random.choice(chars) for _ in range(size))
+
+    # #######################################
+    # Parsing Array to Zone Dictionary - this is going
+    # to be a bit messy, and specific to loading
+    # from the named-checkzone utility
+    # #######################################
+
+    def failed_check(self):
+            raise IndexError("Array Notation should conform to named-checkzone"
+                             " specification")
+
+    def a_from_array(self, data):
+        if len(data) < 6:
+            self.failed_check()
+        ttl = data[4].strip().split(' IN')[0]
+        addr = data[6].strip()
+        alias = self.tldxtr(data[0].strip()).subdomain
+        parsed = {'ttl': ttl, 'addr': addr, 'alias': alias}
+        self.zone.a(parsed)
+
+    def aaaa_from_array(self, data):
+        if len(data) < 6:
+            self.failed_check()
+        ttl = data[4].strip().split(' IN')[0]
+        addr = data[6].strip()
+        alias = self.tldxtr(data[0].strip()).subdomain
+        parsed = {'ttl': ttl, 'addr': addr, 'alias': alias}
+        self.zone.aaaa(parsed)
+
+    def cname_from_array(self, data):
+        if len(data) < 6:
+            self.failed_check()
+        pass
+
+    def ns_from_array(self, data):
+        if len(data) < 6:
+            self.failed_check()
+        ttl = data[4].strip().split(' IN')[0]
+        owner_name = data[0]
+        alias = data[6].strip()
+
+    def soa_from_array(self, data):
+        if len(data) < 6:
+            self.failed_check()
+        logging.info(data)
+        ttl = data[4].strip().split(' IN')[0]
+        addr = data[6].strip().split(' ')[0]
+        alias = data[6].strip().split(' ')[1]
+        serial = data[6].strip().split(' ')[2]
+        refresh = data[6].strip().split(' ')[3]
+        update_retry = data[6].strip().split(' ')[4]
+        expiry = data[6].strip().split(' ')[5]
+        minimum = data[6].strip().split(' ')[6]
+        parsed = {'ttl': ttl, 'addr': addr, 'alias': alias, 'serial': serial,
+                  'refresh': refresh, 'update-retry': update_retry,
+                  'expiry': expiry, 'minimum': minimum}
+        self.zone.soa(parsed)
+
+    def array_to_zone(self):
+        if not self.contents:
+            raise ValueError("Missing Zone Contents")
+
+        for entry in self.contents:
+            line = entry.split('\t')
+            dclass = line[5]
+            for case in switch(dclass):
+                if case('A'):
+                    self.a_from_array(line)
+                    break
+                if case('AAAA'):
+                    self.aaaa_from_array(line)
+                    break
+                if case('CNAME'):
+                    self.cname_from_array(line)
+                    break
+                if case('NS'):
+                    self.ns_from_array(line)
+                    break
+                if case('SOA'):
+                    self.soa_from_array(line)
+                    break
+                if case():
+                    logging.warning('Unable to match type %s' % dclass)
+
+
+# Python doesn't give us a switch case statement, so replicate it here.
+class switch(object):
+    def __init__(self, value):
+        self.value = value
+        self.fall = False
+
+    def __iter__(self):
+        """Return the match method once, then stop"""
+        yield self.match
+        raise StopIteration
+
+    def match(self, *args):
+        """Indicate whether or not to enter a case suite"""
+        if self.fall or not args:
+            return True
+        elif self.value in args:
+            self.fall = True
+            return True
+        else:
+            return False
