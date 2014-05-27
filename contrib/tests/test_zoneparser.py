@@ -29,7 +29,7 @@ www.example.com. 				604800 IN 	CNAME 	foo.example.com."""
 
     def test_init_loads_keys_from_zone_class(self):
         zp = ZoneParser('example.com')
-        self.assertIn('caa', zp.implemented_records)
+        self.assertIn('aaaa', zp.implemented_records)
 
     @patch('builtins.open' if sys.version_info > (3,) else '__builtin__.open')
     def test_from_file(self, mopen):
@@ -91,3 +91,21 @@ www.example.com. 				604800 IN 	CNAME 	foo.example.com."""
         self.assertEqual(zp.zone.contents['aaaa'], [{'ttl': '604800',
                                                     'addr': '::1',
                                                     'alias': ''}])
+
+    @patch('contrib.bind.zone.Zone.to_file')
+    def test_save(self, fwm):
+        zp = ZoneParser('example.com')
+        zp.save('/tmp')
+        fwm.assert_called_with(outpath='/tmp', domain='example.com')
+
+    @patch('contrib.bind.zoneparser.ZoneParser.id_generator')
+    @patch('subprocess.call')
+    @patch('os.path.exists')
+    def test_normalize_contents(self, opem, spm, idm):
+        idm.return_value = 'ABC123'
+        opem.return_value = True
+        zp = ZoneParser('example.com')
+        zp.zonefile = '/tmp/foobar'
+        zp.normalize_contents('/tmp/foobar')
+        spm.assert_called_with(['named-checkzone', '-o', '/tmp/ABC123',
+                                'example.com', '/tmp/foobar'])

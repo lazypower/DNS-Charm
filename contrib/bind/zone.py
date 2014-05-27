@@ -1,4 +1,6 @@
 import jinja2
+import os
+
 
 # Supports an incomplete SPEC of DNS Zone entrys
 class Zone(object):
@@ -101,5 +103,11 @@ class Zone(object):
     # Template Methods
     # ############
 
-    def to_file(self):
-        
+    def to_file(self, outpath='/etc/bind', domain='example.com'):
+        with open('%s/contrib/bind/templates/zone.jinja2' %
+                  os.environ['CHARM_DIR']) as f:
+            contents = f.read()
+        t = jinja2.Template(contents)
+
+        with open('%s/db.%s' % (outpath, domain), 'w') as f:
+            f.write(t.render(data=self.contents))

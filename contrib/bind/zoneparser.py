@@ -28,26 +28,40 @@ class ZoneParser(object):
         self.implemented_records = self.zone.contents.keys()
         self.tldxtr = tldextract.extract
         if file_handle:
-            self.zonefile = file_handle
-            self.contents = self.from_file(file_handle)
-            self.array_to_zone()
+            self.load_and_parse(file_handle)
+        # Todo handle if file exists
+
+    def load_and_parse(self, filepath):
+        self.zonefile = filepath
+        self.contents = self.from_file(filepath)
+        self.array_to_zone()
 
     def from_file(self, file_handle):
         contents = []
-        normalized_file = self.__normalize_contents(file_handle)
+        normalized_file = self.normalize_contents(file_handle)
         with open(normalized_file) as f:
             for line in f.readlines():
                 contents.append(line)
         return contents
 
+    def save(self, outpath='/etc/bind'):
+        self.zone.to_file(outpath=outpath, domain=self.domain)
+
     # ####################################
     # Utility Methods
     # ####################################
 
+    def locate_zone(self, filepath):
+        if not os.path.exists(filepath):
+            open('/etc/bind/db.%s' % self.domain, 'a').close()
+            return "/etc/bind/db.%s" % self.domain
+        else:
+            return filepath
+
     # Create an intermediate file to warehouse the normalized config
-    def __normalize_contents(self, file_handle):
+    def normalize_contents(self, file_handle):
         if os.path.exists(file_handle):
-            rando = self.__id_generator(8)
+            rando = self.id_generator(8)
             rando_filepath = "/tmp/%s" % rando
             subprocess.call(['named-checkzone', '-o', rando_filepath,
                              self.domain, file_handle])
@@ -58,9 +72,14 @@ class ZoneParser(object):
             if configuration['type'] not in self.implemented_records:
                 raise KeyError("Unknown key %s" % configuration['type'])
 
-    def __id_generator(self, size=6):
+    def id_generator(self, size=6):
         chars = string.ascii_uppercase + string.digits
         return ''.join(random.choice(chars) for _ in range(size))
+
+    def __is_path(self, file_handle):
+        if os.path.sep in file_handle:
+            return True
+        return False
 
     # #######################################
     # Parsing Array to Zone Dictionary - this is going

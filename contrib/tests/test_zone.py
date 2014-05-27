@@ -1,4 +1,6 @@
 import unittest
+from mock import patch, Mock
+import sys
 
 from contrib.bind.zone import Zone
 
