@@ -1,9 +1,30 @@
 #!/usr/bin/python
+import os
+import subprocess
+import sys
 
-from common import (
-    sanity_check,
-    install_bind,
+
+# Add charmhelpers to the system path.
+try:
+    sys.path.insert(0, os.path.abspath(os.path.join(os.environ['CHARM_DIR'],
+                                                    'lib')))
+    sys.path.insert(0, os.path.abspath(os.path.join(os.environ['CHARM_DIR'],
+                                                    'contrib')))
+except:
+    sys.path.insert(0, os.path.abspath(os.path.join('..', 'lib')))
+    sys.path.insert(0, os.path.abspath(os.path.join('..', 'contrib')))
+
+from charmhelpers.core.hookenv import (
+    log,
+    config,
+    unit_get,
 )
+from charmhelpers.fetch import (
+    apt_install,
+    apt_update,
+)
+
+from bind.provider import BindProvider
 
 
 # Does not assume offline environment by default
@@ -12,8 +33,35 @@ def install():
         return 0
 
     # TODO: Check offline, install fatpack
-    install_bind()
+    apt_update(fatal=True)
+    apt_install(packages=[
+        'python-pip',
+        'make',
+        ], fatal=True)
+
+    subprocess.call(['make', 'setup'])
+
+
+def install_from_provider():
+    if config()['provider'] == 'bind':
+        bp = BindProvider()
+        bp.install()
+
+
+def sanity_check():
+    if not config()['canonical_domain']:
+        log("No Canonical Domain specified - Aborting until configured")
+        # It's reasonable to assume we're not doing anything useful at this
+        # point, as we are unconfigured. Abort doing *anything*
+        return False
+    return True
+
+# Place the offline environment as a config option
+# Place the files in data/ and the provider/charm will look to isntall this
+# information from there.
+
 
 
 if __name__ == '__main__':
     install()
+    install_from_provider()

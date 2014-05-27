@@ -1,7 +1,7 @@
 import os
 import sys
 import urllib2
-from publicsuffix import PublicSuffixList
+import tldextract
 
 # Add charmhelpers to the system path.
 try:
@@ -16,9 +16,7 @@ from charmhelpers.core.hookenv import (
     config,
     unit_get,
 )
-from charmhelpers.core.host import (
-    mkdir,
-)
+
 from charmhelpers.fetch import (
     apt_install,
     apt_update,
@@ -35,12 +33,8 @@ def sanity_check():
 
 
 # ###########
-# Environment Probe / Modifications
+# Environment Probing / Modifications
 # ###########
-
-# Create Configuration Directories for local Bind9 Server
-def make_bind_store():
-    mkdir('/etc/bind/zones')
 
 
 # Parse existing nameservers from resolv.conf
@@ -52,7 +46,7 @@ def existing_nameservers():
         for line in contents:
             if line.find('nameserver') != -1:
                 dns_servers.append(line.replace('nameserver ', '').rstrip())
-
+    log('Found existing nameservers %s' % dns_servers)
     return dns_servers
 
 
@@ -66,52 +60,3 @@ def am_i_online():
     except urllib2.URLError:
         pass
     return False
-
-
-# #####
-# Bind Management Tasks
-# #####
-
-# Leverage dnspython to create a zone file
-def create_zone(domain, ttl=3600):
-    # always return canonical domain + TLD - if someone gets funky and
-    # passes mail.myexample.co.uk - we only care about myexample.co.uk
-    psl = PublicSuffixList()
-    canonical = psl.get_public_suffix(domain)
-
-    
-
-
-# # Determine if we are a DHCP based client. If so we need to scrape some
-# # information from the DHCP leases to properly configure Bind9
-# def probe_dhcp():
-#     dhcpd = os.path.join(os.path.sep, 'var', 'lib', 'dhcp')
-#     conf = os.listdir(dhcpd)
-#     dhcp_leases = []
-#     for dc in conf:
-#         with open(dc) as f:
-#             # dhcp_leases.append(parse_dhcp_lease(f.readlines()))
-#             pass
-
-
-# # Parse passed array of file contents.
-# def parse_dhcp_lease(dhcpconf):
-#     if len(dhcpconf) != 4:
-#         return
-
-
-
-# ###########
-# BIND tasks
-# ###########
-
-def install_bind():
-    sanity_check()
-
-    log("Preparing for BIND installation")
-    apt_update(fatal=True)
-    apt_install(packages=[
-        'bind9',
-        'dnsutils',
-        'python-dnspython'
-        ], fatal=True)

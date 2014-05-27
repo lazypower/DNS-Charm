@@ -6,8 +6,6 @@ import string
 import tldextract
 from .zone import Zone
 
-import ipdb
-
 # Note about how this is constructed. BIND ships with a tool called
 # named-checkzone. This normalizes ALL output from a bind file, and
 # allows this class to make some assumptions about placement of values.

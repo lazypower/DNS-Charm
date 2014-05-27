@@ -1,8 +1,9 @@
-name: bind
-summary: Deploys a BIND DNS server
+name: dns
+summary: Deploys a DNS server or wrapper to manage service name resolution
 maintainer: charles <charles.butler@canonical.com>
 description: |
-  Deploys BIND9, and exposes a programmable API to set DNS records
+  Deploys BIND9, and exposes a programmable API to set DNS records, alternatively
+  utilizes a plugin architecture to extend the charm to other API based DNS services.
 categories:
   - Applications
 subordinate: false
