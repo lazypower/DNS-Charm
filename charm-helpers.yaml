@@ -3,4 +3,3 @@ destination: lib/charmhelpers
 include:
     - core
     - fetch
-    - contrib/network
