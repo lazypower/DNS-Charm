@@ -17,14 +17,11 @@ except:
 from charmhelpers.core.hookenv import (
     log,
     config,
-    unit_get,
 )
 from charmhelpers.fetch import (
     apt_install,
     apt_update,
 )
-
-from bind.provider import BindProvider
 
 
 # Does not assume offline environment by default
@@ -42,14 +39,8 @@ def install():
     subprocess.call(['make', 'setup'])
 
 
-def install_from_provider():
-    if config()['provider'] == 'bind':
-        bp = BindProvider()
-        bp.install()
-
-
 def sanity_check():
-    if not config()['canonical_domain']:
+    if not config()['domain']:
         log("No Canonical Domain specified - Aborting until configured")
         # It's reasonable to assume we're not doing anything useful at this
         # point, as we are unconfigured. Abort doing *anything*
@@ -61,7 +52,5 @@ def sanity_check():
 # information from there.
 
 
-
 if __name__ == '__main__':
     install()
-    install_from_provider()
