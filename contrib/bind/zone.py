@@ -26,6 +26,9 @@ class Zone(object):
         if not value:
             return self.contents['a']
         else:
+            idx = self.find(self.contents['a'], 'alias', value['alias'])
+            if idx != -1:
+                self.contents['a'].pop(idx)
             self.contents['a'].append(value)
             return self.contents['a']
 
@@ -61,6 +64,9 @@ class Zone(object):
         if not value:
             return self.contents['ns']
         else:
+            idx = self.find(self.contents['ns'], 'addr', value['addr'])
+            if idx != -1:
+                self.contents['ns'].pop(idx)
             self.contents['ns'].append(value)
             return self.contents['ns']
 
@@ -75,6 +81,8 @@ class Zone(object):
         if not value:
             return self.contents['soa']
         else:
+            if len(self.contents['soa']) > 1:
+                self.contents['soa'].pop(-1)
             self.contents['soa'].append(value)
             return self.contents['soa']
 
@@ -111,3 +119,12 @@ class Zone(object):
 
         with open('%s' % filepath, 'w') as f:
             f.write(t.render(data=self.contents))
+
+    # #############
+    # Utility methods
+    # #############
+    def find(self, lst, key, value):
+        for i, dic in enumerate(lst):
+            if dic[key] == value:
+                return i
+        return -1
