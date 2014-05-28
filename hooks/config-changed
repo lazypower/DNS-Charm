@@ -27,7 +27,7 @@ class ConfigChanged(object):
         if self.config['provider'] == 'bind':
             bp = BindProvider()
             bp.install()
-            bp.config_changed()
+            bp.config_changed(self.config['domain'])
 
 
 if __name__ == '__main__':
