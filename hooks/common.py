@@ -42,11 +42,9 @@ def existing_nameservers():
     dns_servers = []
     with open('/etc/resolv.conf') as f:
         contents = f.readlines()
-        print contents
         for line in contents:
             if line.find('nameserver') != -1:
                 dns_servers.append(line.replace('nameserver ', '').rstrip())
-    log('Found existing nameservers %s' % dns_servers)
     return dns_servers
 
 
