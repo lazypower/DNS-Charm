@@ -15,7 +15,7 @@ $TTL    604800
 {{record['owner-name']}}	IN      NS	{{record['addr']}}
 {%- endfor %}
 {%- for record in data['a'] %}
-{{record['alias']}}     		IN      CNAME	{{record['addr']}}
+{{record['alias']}}     	IN      A	{{record['addr']}}
 {%- endfor %}
 {%- for record in data['cname'] %}
 {{record['alias']}}     		IN      CNAME	{{record['addr']}}
