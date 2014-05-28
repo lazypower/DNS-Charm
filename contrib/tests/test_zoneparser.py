@@ -62,7 +62,7 @@ www.example.com. 				604800 IN 	CNAME 	foo.example.com."""
         zcontents = self.ez.split('\n')
         zp.soa_from_array(zcontents[0].split('\t'))
         self.assertEqual(zp.zone.contents['soa'], [{'addr': 'example.com.',
-                                                'alias': 'root.example.com.',
+                                                'owner': 'root.example.com.',
                                                 'expiry': '2419200',
                                                 'minimum': '604800',
                                                 'refresh': '604800',

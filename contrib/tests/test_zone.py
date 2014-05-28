@@ -50,12 +50,10 @@ class TestZone(unittest.TestCase):
 
     def test_ns_getset(self):
         z = Zone()
-        record = {'owner-name': 'example.com.', 'addr': '10.0.0.1',
-                  'alias': 'ns1.example.com'}
+        record = {'alias': 'example.com.', 'addr': '10.0.0.1'}
         self.assertEqual(z.ns(), [])
         self.assertEqual(z.ns(record),
-                         [{'owner-name': 'example.com.', 'addr': '10.0.0.1',
-                           'alias': 'ns1.example.com'}])
+                         [{'addr': '10.0.0.1', 'alias': 'example.com.'}])
 
     def test_ptr_getset(self):
         z = Zone()
@@ -67,13 +65,13 @@ class TestZone(unittest.TestCase):
     def test_soa_getset(self):
         z = Zone()
         record = {'ttl': '@', 'addr': 'ns1.example.com.',
-                  'alias': 'hostmaster.example.com', 'serial': '2003080800',
+                  'owner': 'hostmaster.example.com', 'serial': '2003080800',
                   'refresh': '12h', 'update-retry': '15m', 'expiry': '3w',
                   'minimum': '3h'}
         self.assertEqual(z.soa(), [])
         self.assertEqual(z.soa(record),
                          [{'ttl': '@', 'addr': 'ns1.example.com.',
-                           'alias': 'hostmaster.example.com',
+                           'owner': 'hostmaster.example.com',
                            'serial': '2003080800',
                            'refresh': '12h',
                            'update-retry': '15m',

@@ -133,9 +133,9 @@ class ZoneParser(object):
         if len(data) < 6:
             self.failed_check()
         ttl = data[4].strip().split(' IN')[0]
-        owner_name = "%s." % self.domain
-        alias = data[6].strip()
-        parsed = {'ttl': ttl, 'alias': alias, 'owner-name': owner_name}
+        addr = data[6].strip()
+        alias = data[0].strip()
+        parsed = {'ttl': ttl, 'alias': alias, 'addr': addr}
         self.zone.ns(parsed)
 
     def update_soa(self, data):
@@ -148,7 +148,7 @@ class ZoneParser(object):
         logging.info("agg: %s" % agg)
         ttl = data[4].strip().split(' IN')[0]
         addr = agg[0]
-        alias = agg[1]
+        owner = agg[1]
         serial = agg[2]
         refresh = agg[3]
         try:
@@ -163,7 +163,7 @@ class ZoneParser(object):
             minimum = agg[6]
         except:
             minimum = None
-        parsed = {'ttl': ttl, 'addr': addr, 'alias': alias, 'serial': serial,
+        parsed = {'ttl': ttl, 'addr': addr, 'owner': owner, 'serial': serial,
                   'refresh': refresh, 'update-retry': update_retry,
                   'expiry': expiry, 'minimum': minimum}
         self.zone.soa(parsed)

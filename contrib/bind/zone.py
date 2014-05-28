@@ -64,7 +64,7 @@ class Zone(object):
         if not value:
             return self.contents['ns']
         else:
-            idx = self.find(self.contents['ns'], 'addr', value['addr'])
+            idx = self.find(self.contents['ns'], 'alias', value['alias'])
             if idx != -1:
                 self.contents['ns'].pop(idx)
             self.contents['ns'].append(value)
