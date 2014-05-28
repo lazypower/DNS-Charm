@@ -97,7 +97,7 @@ class ZoneParser(object):
         if len(data) < 6:
             self.failed_check()
         ttl = data[4].strip().split(' IN')[0]
-        addr = data[6].strip()
+        addr = data[-1].strip()
         try:
             alias = self.tldxtr(data[0].strip()).subdomain
         except:
@@ -174,7 +174,12 @@ class ZoneParser(object):
 
         for entry in self.contents:
             line = entry.split('\t')
-            dclass = line[5].strip()
+            # find first occurrence of type.
+            idx = self.find_type(line)
+            if idx == -1:
+                logging.warning('Unable to match entry %s' % entry)
+                next
+            dclass = line[idx].strip()
             for case in switch(dclass):
                 if case('A'):
                     self.a_from_array(line)
@@ -194,6 +199,13 @@ class ZoneParser(object):
                 if case():
                     pass
                     logging.warning('Unable to match type %s' % dclass)
+
+    # This may get slow
+    def find_type(self, line):
+        for t in self.implemented_records:
+            if t.upper() in line:
+                return line.index(t.upper())
+        return -1
 
     # Somewhat ambiguous. array_to_zone parses a full array to populate
     # dict to zone assumes a single record.
