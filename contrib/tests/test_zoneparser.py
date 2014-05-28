@@ -31,12 +31,14 @@ www.example.com. 				604800 IN 	CNAME 	foo.example.com."""
         zp = ZoneParser('example.com')
         self.assertIn('aaaa', zp.implemented_records)
 
+    @patch('os.path.exists')
     @patch('builtins.open' if sys.version_info > (3,) else '__builtin__.open')
-    def test_from_file(self, mopen):
+    def test_from_file(self, mopen, mose):
         mopen.return_value.__enter__ = lambda s: s
         mopen.return_value.__exit__ = Mock()
         mopen.return_value.readlines.return_value = self.ez.split('\n')
-        zp = ZoneParser('example.com', '/etc/db.foo')
+        mose.return_value = True
+        zp = ZoneParser('example.com')
         self.assertTrue(len(zp.contents) == 6)
 
     @patch('contrib.bind.zoneparser.ZoneParser.a_from_array')
@@ -95,17 +97,20 @@ www.example.com. 				604800 IN 	CNAME 	foo.example.com."""
     @patch('contrib.bind.zone.Zone.to_file')
     def test_save(self, fwm):
         zp = ZoneParser('example.com')
-        zp.save('/tmp')
-        fwm.assert_called_with(outpath='/tmp', domain='example.com')
+        zp.save()
+        fwm.assert_called_with('/etc/bind/db.example.com')
 
     @patch('contrib.bind.zoneparser.ZoneParser.id_generator')
     @patch('subprocess.call')
     @patch('os.path.exists')
-    def test_normalize_contents(self, opem, spm, idm):
+    @patch('builtins.open' if sys.version_info > (3,) else '__builtin__.open')
+    def test_normalize_contents(self, mopen, opem, spm, idm):
+        mopen.return_value.__enter__ = lambda s: s
+        mopen.return_value.__exit__ = Mock()
+        mopen.return_value.readlines.return_value = self.ez.split('\n')
         idm.return_value = 'ABC123'
         opem.return_value = True
         zp = ZoneParser('example.com')
-        zp.zonefile = '/tmp/foobar'
-        zp.normalize_contents('/tmp/foobar')
+        zp.normalize_contents()
         spm.assert_called_with(['named-checkzone', '-o', '/tmp/ABC123',
-                                'example.com', '/tmp/foobar'])
+                                'example.com', '/etc/bind/db.example.com'])

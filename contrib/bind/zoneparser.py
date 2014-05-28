@@ -23,48 +23,50 @@ class ZoneParser(object):
     def __init__(self, domain, file_handle=None):
         self.zone = Zone()
         self.domain = domain
+        self.zonefile = "/etc/bind/db.%s" % self.domain
         self.implemented_records = self.zone.contents.keys()
         self.tldxtr = tldextract.extract
-        if file_handle:
-            self.load_and_parse(file_handle)
-        # Todo handle if file exists
+        if self.has_zone():
+            self.load_and_parse('/etc/bind/db.%s' % self.domain)
 
     def load_and_parse(self, filepath):
-        self.zonefile = filepath
-        self.contents = self.from_file(filepath)
+        self.contents = self.from_file()
         self.array_to_zone()
 
-    def from_file(self, file_handle):
+    def from_file(self):
         contents = []
-        normalized_file = self.normalize_contents(file_handle)
-        with open(normalized_file) as f:
-            for line in f.readlines():
-                contents.append(line)
+        normalized_file = self.normalize_contents()
+        try:
+            with open(normalized_file) as f:
+                for line in f.readlines():
+                    contents.append(line)
+        except:
+            logging.info('Unable to open file %s as normalized: %s' %
+                        (self.zonefile, normalized_file))
+            pass
         return contents
 
-    def save(self, outpath='/etc/bind'):
-        self.zone.to_file(outpath=outpath, domain=self.domain)
+    def save(self):
+        self.zone.to_file(self.zonefile)
 
     # ####################################
     # Utility Methods
     # ####################################
 
-    def locate_zone(self, filepath):
-        if not os.path.exists(filepath):
-            open('/etc/bind/db.%s' % self.domain, 'a').close()
-            return "/etc/bind/db.%s" % self.domain
-        else:
-            return filepath
-
     # Create an intermediate file to warehouse the normalized config
-    def normalize_contents(self, file_handle):
-        if os.path.exists(file_handle):
+    def normalize_contents(self):
+        if os.path.exists(self.zonefile):
             rando = self.id_generator(8)
             rando_filepath = "/tmp/%s" % rando
             subprocess.call(['named-checkzone', '-o', rando_filepath,
-                             self.domain, file_handle])
+                             self.domain, self.zonefile])
             logging.info('created temporary file %s' % rando_filepath)
             return rando_filepath
+
+    def has_zone(self):
+        if os.path.exists('/etc/bind/db.%s' % self.domain):
+            return True
+        return False
 
     def __validate_attributes(self, configuration):
             if configuration['type'] not in self.implemented_records:
@@ -160,7 +162,7 @@ class ZoneParser(object):
 
     def array_to_zone(self):
         if not self.contents:
-            raise ValueError("Missing Zone Contents")
+            return
 
         for entry in self.contents:
             line = entry.split('\t')
