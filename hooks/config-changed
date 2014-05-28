@@ -14,11 +14,7 @@ except:
 
 from bind.provider import BindProvider
 
-from charmhelpers.core.hookenv import (
-    log,
-    config,
-    unit_get,
-)
+from charmhelpers.core.hookenv import config
 
 
 class ConfigChanged(object):
@@ -30,6 +26,7 @@ class ConfigChanged(object):
     def determine_provider(self):
         if self.config['provider'] == 'bind':
             bp = BindProvider()
+            bp.install()
             bp.config_changed()
 
 
