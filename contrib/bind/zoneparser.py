@@ -43,7 +43,6 @@ class ZoneParser(object):
         except:
             logging.info('Unable to open file %s as normalized: %s' %
                         (self.zonefile, normalized_file))
-            pass
         return contents
 
     def save(self):
@@ -91,6 +90,9 @@ class ZoneParser(object):
             raise IndexError("Array Notation should conform to named-checkzone"
                              " specification")
 
+    def update_a(self, data):
+        self.zone.a(data)
+
     def a_from_array(self, data):
         if len(data) < 6:
             self.failed_check()
@@ -124,6 +126,9 @@ class ZoneParser(object):
         parsed = {'ttl': ttl, 'addr': addr, 'alias': alias}
         self.zone.cname(parsed)
 
+    def update_ns(self, data):
+        self.zone.ns(data)
+
     def ns_from_array(self, data):
         if len(data) < 6:
             self.failed_check()
@@ -132,6 +137,9 @@ class ZoneParser(object):
         alias = data[6].strip()
         parsed = {'ttl': ttl, 'alias': alias, 'owner-name': owner_name}
         self.zone.ns(parsed)
+
+    def update_soa(self, data):
+        self.zone.soa(data)
 
     def soa_from_array(self, data):
         if len(data) < 6:
@@ -186,6 +194,26 @@ class ZoneParser(object):
                 if case():
                     pass
                     logging.warning('Unable to match type %s' % dclass)
+
+    # Somewhat ambiguous. array_to_zone parses a full array to populate
+    # dict to zone assumes a single record.
+    def dict_to_zone(self, record):
+        if 'rr' in record.keys():
+            for case in switch(record['rr']):
+                if case('A'):
+                    self.update_a(record)
+                    break
+                if case('NS'):
+                    self.update_ns(record)
+                    break
+                if case('SOA'):
+                    self.update_soa(record)
+                    break
+                if case():
+                    pass
+                    logging.warning('Unable to match type %s' % record['rr'])
+
+
 
 
 # Python doesn't give us a switch case statement, so replicate it here.
