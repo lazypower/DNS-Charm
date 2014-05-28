@@ -1,5 +1,5 @@
 options:
-  canonical_domain:
+  domain:
     type: string
     default: ""
     description: "Base Canonical Domain name for environment"
