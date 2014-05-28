@@ -33,11 +33,6 @@ class TestCommon(unittest.TestCase):
         self.assertFalse(common.sanity_check())
         cfgmock.assert_called_once(common.sanity_check())
 
-    @patch('hooks.common.mkdir')
-    def test_make_bind_store(self, mkdrmock):
-        common.make_bind_store()
-        mkdrmock.assert_called_with('/etc/bind/zones')
-
     @patch('builtins.open' if sys.version_info > (3,) else '__builtin__.open')
     def test_existing_nameservers(self, omck):
         omck.return_value.__enter__ = lambda s: s
