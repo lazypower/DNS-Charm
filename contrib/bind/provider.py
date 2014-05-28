@@ -59,3 +59,5 @@ class BindProvider(object):
                              'ttl': 300})
         parser.dict_to_zone({'rr': 'A', 'alias': 'ns1', 'addr': addr,
                              'ttl': 300})
+        parser.dict_to_zone({'rr': 'CNAME', 'alias': 'ns',
+                             'addr': 'ns1.example.com.', 'ttl': 300})

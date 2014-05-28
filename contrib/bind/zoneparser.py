@@ -86,16 +86,16 @@ class ZoneParser(object):
     # from the named-checkzone utility - this is brittle
     # #######################################
 
-    def failed_check(self):
-            raise IndexError("Array Notation should conform to named-checkzone"
-                             " specification")
+    def sanity(self, data):
+            if len(data) < 5:
+                raise IndexError("Array Notation should conform to "
+                                 "named-checkzone specification")
 
     def update_a(self, data):
         self.zone.a(data)
 
     def a_from_array(self, data):
-        if len(data) < 6:
-            self.failed_check()
+        self.sanity(data)
         ttl = data[4].strip().split(' IN')[0]
         addr = data[-1].strip()
         try:
@@ -106,8 +106,8 @@ class ZoneParser(object):
         self.zone.a(parsed)
 
     def aaaa_from_array(self, data):
-        if len(data) < 6:
-            self.failed_check()
+        self.sanity(data)
+
         ttl = data[4].strip().split(' IN')[0]
         addr = data[6].strip()
         try:
@@ -117,12 +117,15 @@ class ZoneParser(object):
         parsed = {'ttl': ttl, 'addr': addr, 'alias': alias}
         self.zone.aaaa(parsed)
 
+    def update_cname(self, data):
+        self.zone.cname(data)
+
     def cname_from_array(self, data):
-        if len(data) < 6:
-            self.failed_check()
-        alias = self.tldxtr(data[0].strip()).subdomain
-        ttl = data[4].strip().split(' IN')[0]
-        addr = data[6].strip()
+        self.sanity(data)
+
+        alias = self.tldxtr(data[0]).subdomain
+        ttl = data[1]
+        addr = data[4].strip()
         parsed = {'ttl': ttl, 'addr': addr, 'alias': alias}
         self.zone.cname(parsed)
 
@@ -130,11 +133,11 @@ class ZoneParser(object):
         self.zone.ns(data)
 
     def ns_from_array(self, data):
-        if len(data) < 6:
-            self.failed_check()
-        ttl = data[4].strip().split(' IN')[0]
-        addr = data[6].strip()
-        alias = data[0].strip()
+        self.sanity(data)
+
+        ttl = data[1]
+        addr = data[4]
+        alias = data[0]
         parsed = {'ttl': ttl, 'alias': alias, 'addr': addr}
         self.zone.ns(parsed)
 
@@ -142,25 +145,28 @@ class ZoneParser(object):
         self.zone.soa(data)
 
     def soa_from_array(self, data):
-        if len(data) < 6:
-            self.failed_check()
-        agg = data[6].strip().split(' ')
-        logging.info("agg: %s" % agg)
-        ttl = data[4].strip().split(' IN')[0]
-        addr = agg[0]
-        owner = agg[1]
-        serial = agg[2]
-        refresh = agg[3]
+        self.sanity(data)
+
+        logging.info("data: %s" % data)
+        # root 0
+        ttl = data[1]
+        # ttl 2
+        # rr 3
+        addr = data[4]
+        owner = data[5]
+        serial = data[6]
+        refresh = data[7]
+
         try:
-            update_retry = agg[4]
+            update_retry = data[8]
         except:
             update_retry = None
         try:
-            expiry = agg[5]
+            expiry = data[9]
         except:
             expiry = None
         try:
-            minimum = agg[6]
+            minimum = data[10]
         except:
             minimum = None
         parsed = {'ttl': ttl, 'addr': addr, 'owner': owner, 'serial': serial,
@@ -173,17 +179,9 @@ class ZoneParser(object):
             return
 
         for entry in self.contents:
-            line = entry.split('\t')
-            # find first occurrence of type.
-            idx = self.find_type(line)
-            if idx == -1:
-                logging.warning('Unable to match entry %s' % entry)
-                next
-            dclass = line[idx].strip()
+            line = entry.split()
+            dclass = line[3].strip()
             for case in switch(dclass):
-                if case('A'):
-                    self.a_from_array(line)
-                    break
                 if case('AAAA'):
                     self.aaaa_from_array(line)
                     break
@@ -195,6 +193,9 @@ class ZoneParser(object):
                     break
                 if case('SOA'):
                     self.soa_from_array(line)
+                    break
+                if case('A'):
+                    self.a_from_array(line)
                     break
                 if case():
                     pass
@@ -221,12 +222,12 @@ class ZoneParser(object):
                 if case('SOA'):
                     self.update_soa(record)
                     break
+                if case('CNAME'):
+                    self.update_cname(record)
+                    break
                 if case():
                     pass
                     logging.warning('Unable to match type %s' % record['rr'])
-
-
-
 
 # Python doesn't give us a switch case statement, so replicate it here.
 class switch(object):

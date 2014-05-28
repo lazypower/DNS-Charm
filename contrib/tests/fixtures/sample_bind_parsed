@@ -1,0 +1,5 @@
+example.com.				      604800 IN	SOA	ns.example.com. root.example.com. 2003080800 43200 900 1814400 900
+example.com.				      604800 IN	NS	ns1.example.com.
+example.com.				      604800 IN	A	10.0.3.103
+ns.example.com.				      604800 IN	CNAME	ns1.example.com.
+ns1.example.com.			      604800 IN	A	10.0.3.103
