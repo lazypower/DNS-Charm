@@ -1,7 +1,7 @@
 options:
   domain:
     type: string
-    default: ""
+    default: "example.com"
     description: "Base Canonical Domain name for environment"
   provider:
     type: string
