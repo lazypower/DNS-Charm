@@ -24,33 +24,35 @@ from charmhelpers.fetch import (
 )
 
 
-# Does not assume offline environment by default
-def install():
-    if not sanity_check():
-        return 0
+class Install(object):
 
-    # TODO: Check offline, install fatpack
-    apt_update(fatal=True)
-    apt_install(packages=[
-        'python-pip',
-        'make',
-        ], fatal=True)
+    # Does not assume offline environment by default
+    def install_core(self):
+        if not self.sanity_check():
+            return 0
 
-    subprocess.call(['make', 'setup'])
+        # TODO: Check offline, install fatpack
+        apt_update(fatal=True)
+        apt_install(packages=[
+            'python-pip',
+            'make',
+            ], fatal=True)
 
+        subprocess.call(['make', 'setup'])
 
-def sanity_check():
-    if not config()['domain']:
-        log("No Canonical Domain specified - Aborting until configured")
-        # It's reasonable to assume we're not doing anything useful at this
-        # point, as we are unconfigured. Abort doing *anything*
-        return False
-    return True
+    def sanity_check(self):
+        if not config()['domain']:
+            log("No Canonical Domain specified - Aborting until configured")
+            # It's reasonable to assume we're not doing anything useful at this
+            # point, as we are unconfigured. Abort doing *anything*
+            return False
+        return True
 
-# Place the offline environment as a config option
-# Place the files in data/ and the provider/charm will look to isntall this
-# information from there.
+    # Place the offline environment as a config option
+    # Place the files in data/ and the provider/charm will look to isntall this
+    # information from there.
 
 
 if __name__ == '__main__':
-    install()
+    i = Install()
+    i.install_core()
