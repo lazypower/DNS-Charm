@@ -21,7 +21,11 @@ class TestZoneParser(unittest.TestCase):
 
     def test_init_loads_keys_from_zone_class(self):
         zp = ZoneParser('example.com')
-        self.assertIn('aaaa', zp.implemented_records)
+        self.assertIn('CNAME', zp.implemented_records)
+        self.assertIn('AAAA', zp.implemented_records)
+        self.assertIn('A', zp.implemented_records)
+        self.assertIn('SOA', zp.implemented_records)
+        self.assertIn('NS', zp.implemented_records)
 
     @patch('builtins.open' if sys.version_info > (3,) else '__builtin__.open')
     def test_from_file(self, mopen):
@@ -67,7 +71,7 @@ class TestZoneParser(unittest.TestCase):
         zp = ZoneParser('example.com')
         zcontents = self.ez
         zp.soa_from_array(zcontents[0].split())
-        self.assertEqual(zp.zone.contents['soa'], [{'addr': 'ns.example.com.',
+        self.assertEqual(zp.zone.contents['SOA'], [{'addr': 'ns.example.com.',
                                                 'owner': 'root.example.com.',
                                                 'expiry': '1814400',
                                                 'minimum': '900',
@@ -80,7 +84,7 @@ class TestZoneParser(unittest.TestCase):
         zp = ZoneParser('example.com')
         zcontents = self.ez
         zp.cname_from_array(zcontents[3].split())
-        self.assertEqual(zp.zone.contents['cname'], [{'ttl': '604800',
+        self.assertEqual(zp.zone.contents['CNAME'], [{'ttl': '604800',
                                                       'alias': 'ns',
                                                       'addr': 'ns1.example.com.'}])
 
@@ -88,7 +92,7 @@ class TestZoneParser(unittest.TestCase):
         zp = ZoneParser('example.com')
         zcontents = self.ez
         zp.a_from_array(zcontents[2].split('\t'))
-        self.assertEqual(zp.zone.contents['a'], [{'ttl': '604800',
+        self.assertEqual(zp.zone.contents['A'], [{'ttl': '604800',
                                                   'addr': '10.0.3.103',
                                                   'alias': ''}])
 

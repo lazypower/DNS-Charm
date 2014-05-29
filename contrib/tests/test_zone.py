@@ -17,6 +17,8 @@ class TestZone(unittest.TestCase):
         self.assertEqual(z.a(), [])
         self.assertEqual(z.a(record),
                          [{'ttl': 300, 'addr': '10.0.0.1', 'alias': '@'}])
+        self.assertEqual(z.a(record),
+                         [{'ttl': 300, 'addr': '10.0.0.1', 'alias': '@'}])
 
     def test_aaa_getset(self):
         z = Zone()
@@ -141,9 +143,9 @@ class TestZone(unittest.TestCase):
         z.to_file()
         z.read_template.assert_called_once()
         mopen.assert_called_with('/etc/bind/db.example.com', 'w')
-        tm.assert_called_with(data={'soa': [], 'aaaa': [], 'txt': [],
-          'ptr': [], 'spf': [], 'a': [], 'cert': [], 'cname': [], 'srv': [],
-          'caa': [], 'ns': []})
+        tm.assert_called_with(data={'SOA': [], 'AAAA': [], 'TXT': [],
+          'PTR': [], 'SPF': [], 'A': [], 'CERT': [], 'CNAME': [], 'SRV': [],
+          'CAA': [], 'NS': []})
 
 
     @patch.dict('os.environ', {'CHARM_DIR': '/tmp/foo'})
@@ -154,3 +156,14 @@ class TestZone(unittest.TestCase):
         mopen.return_value.read.return_value = "{{foo}}"
         z = Zone()
         self.assertEqual(z.read_template(), "{{foo}}")
+
+
+    def test_remove(self):
+        z = Zone()
+        z.contents['A'] = [{'addr': '10.0.0.1', 'alias': 'abc', 'ttl': 300}]
+        z.remove('alias', 'A', 'abc')
+        self.assertEqual(z.a(), [])
+        with self.assertRaises(IndexError):
+            z.remove('alias', 'NOPE', 'abc')
+        with self.assertRaises(KeyError):
+            z.remove('alias', 'A', 'abc')

@@ -9,106 +9,106 @@ class Zone(object):
 
     def __init__(self):
         self.contents = {
-            'a':  [],
-            'aaaa': [],
-            'caa': [],
-            'cert': [],
-            'cname': [],
-            'ns': [],
-            'ptr': [],
-            'soa': [],
-            'spf': [],
-            'srv': [],
-            'txt': []
+            'A':  [],
+            'AAAA': [],
+            'CAA': [],
+            'CERT': [],
+            'CNAME': [],
+            'NS': [],
+            'PTR': [],
+            'SOA': [],
+            'SPF': [],
+            'SRV': [],
+            'TXT': []
         }
 
     def a(self, value=None):
         if not value:
-            return self.contents['a']
+            return self.contents['A']
         else:
-            idx = self.find(self.contents['a'], 'alias', value['alias'])
+            idx = self.find(self.contents['A'], 'alias', value['alias'])
             if idx != -1:
-                self.contents['a'].pop(idx)
-            self.contents['a'].append(value)
-            return self.contents['a']
+                self.contents['A'].pop(idx)
+            self.contents['A'].append(value)
+            return self.contents['A']
 
     def aaaa(self, value=None):
         if not value:
-            return self.contents['aaaa']
+            return self.contents['AAAA']
         else:
-            self.contents['aaaa'].append(value)
-            return self.contents['aaaa']
+            self.contents['AAAA'].append(value)
+            return self.contents['AAAA']
 
     def caa(self, value=None):
         if not value:
-            return self.contents['caa']
+            return self.contents['CAA']
         else:
-            self.contents['caa'].append(value)
-            return self.contents['caa']
+            self.contents['CAA'].append(value)
+            return self.contents['CAA']
 
     def cert(self, value=None):
         if not value:
-            return self.contents['cert']
+            return self.contents['CERT']
         else:
-            self.contents['cert'].append(value)
-            return self.contents['cert']
+            self.contents['CERT'].append(value)
+            return self.contents['CERT']
 
     def cname(self, value=None):
         if not value:
-            return self.contents['cname']
+            return self.contents['CNAME']
         else:
-            idx = self.find(self.contents['cname'], 'alias', value['alias'])
+            idx = self.find(self.contents['CNAME'], 'alias', value['alias'])
             if idx != -1:
-                self.contents['cname'].pop(idx)
-            self.contents['cname'].append(value)
-            return self.contents['cname']
+                self.contents['CNAME'].pop(idx)
+            self.contents['CNAME'].append(value)
+            return self.contents['CNAME']
 
     def ns(self, value=None):
         if not value:
-            return self.contents['ns']
+            return self.contents['NS']
         else:
-            idx = self.find(self.contents['ns'], 'alias', value['alias'])
+            idx = self.find(self.contents['NS'], 'alias', value['alias'])
             if idx != -1:
-                self.contents['ns'].pop(idx)
-            self.contents['ns'].append(value)
-            return self.contents['ns']
+                self.contents['NS'].pop(idx)
+            self.contents['NS'].append(value)
+            return self.contents['NS']
 
     def ptr(self, value=None):
         if not value:
-            return self.contents['ptr']
+            return self.contents['PTR']
         else:
-            self.contents['ptr'].append(value)
-            return self.contents['ptr']
+            self.contents['PTR'].append(value)
+            return self.contents['PTR']
 
     def soa(self, value=None):
         if not value:
-            return self.contents['soa']
+            return self.contents['SOA']
         else:
-            if len(self.contents['soa']) > 0:
-                self.contents['soa'].pop(-1)
-            self.contents['soa'].append(value)
-            return self.contents['soa']
+            if len(self.contents['SOA']) > 0:
+                self.contents['SOA'].pop(-1)
+            self.contents['SOA'].append(value)
+            return self.contents['SOA']
 
     def spf(self, value=None):
         if not value:
-            return self.contents['spf']
+            return self.contents['SPF']
         else:
-            self.contents['spf'].append(value)
-            return self.contents['spf']
+            self.contents['SPF'].append(value)
+            return self.contents['SPF']
 
     def srv(self, value=None):
         if not value:
-            return self.contents['srv']
+            return self.contents['SRV']
         else:
-            self.contents['srv'].append(value)
-            return self.contents['srv']
+            self.contents['SRV'].append(value)
+            return self.contents['SRV']
 
     def txt(self, value=None):
         if not value:
-            return self.contents['txt']
+            return self.contents['TXT']
         else:
-            self.contents['txt'].append(value)
-            return self.contents['txt']
+            self.contents['TXT'].append(value)
+            return self.contents['TXT']
 
     # ############
     # Template Methods
@@ -134,3 +134,11 @@ class Zone(object):
             if dic[key] == value:
                 return i
         return -1
+
+    def remove(self, needle, haystack, value):
+        if not haystack in self.contents.keys():
+            raise IndexError("Unable to locate %s in storage" % haystack)
+        idx = self.find(self.contents[haystack], needle, value)
+        if idx == -1:
+            raise KeyError("Value not found in %s" % haystack)
+        self.contents[haystack].pop(idx)

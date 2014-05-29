@@ -1,6 +1,7 @@
 import os
 import sys
 from .zoneparser import ZoneParser
+from random import randint
 
 # Add charmhelpers to the system path.
 try:
@@ -40,13 +41,18 @@ class BindProvider(object):
         zp.dict_to_zone(record)
         zp.save()
 
+    def remove_record(self, record, domain='example.com'):
+        zp = ZoneParser(domain)
+        zp.zone.remove(record['rr'], 'alias', record['alias'])
+        zp.save()
+
     def first_setup(self, parser, domain='example.com'):
         # Insert SOA and NS records
         addr = unit_get('public-address')
         parser.dict_to_zone({'rr': 'SOA',
                              'addr': 'ns.%s.' % domain,
                              'owner': 'root.%s.' % domain,
-                             'serial': '2003080800',
+                             'serial': randint(12345678, 22345678),
                              'refresh': '12h',
                              'update-retry': '15m',
                              'expiry': '3w',

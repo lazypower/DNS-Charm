@@ -35,8 +35,6 @@ class TestBindProvider(unittest.TestCase):
         bp.add_record({'rr': 'A', 'alias': 'foo', 'addr': '127.0.0.1'})
         zps.assert_called_once()
         zpm.assert_called_once()
-        # zpm.dict_to_zone.assert_called_with({'rr': 'A', 'alias': 'foo',
-        #                                      'addr': '127.0.0.1'})
 
     @patch('contrib.bind.provider.ZoneParser.save')
     @patch('os.path.exists')
@@ -47,3 +45,11 @@ class TestBindProvider(unittest.TestCase):
         bp.config_changed()
         bp.first_setup.assert_called_once()
         zpsm.assert_called_once()
+
+    @patch('contrib.bind.provider.ZoneParser')
+    def test_remove_record(self, zpm):
+        bp = BindProvider()
+        zpm.zone.remove = Mock()
+        zpm.save = Mock()
+        bp.remove_record({'rr': 'A', 'alias': 'ns'})
+        zpm.save.assert_called_once()
