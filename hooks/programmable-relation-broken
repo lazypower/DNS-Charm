@@ -23,6 +23,11 @@ from charmhelpers.core.hookenv import (
 
 class ProgrammableBroken(object):
 
+    def __init__(self):
+        self.config = config()
+        self.provider = self.determine_provider()
+
+
     def remove_record(self):
         domain = relation_get('domain')
         alias = relation_get('alias')
@@ -36,3 +41,6 @@ class ProgrammableBroken(object):
             bp.remove_record(domain, parsed)
 
 
+
+if __name__ == '__main__':
+    c = ProgrammableChanged()
