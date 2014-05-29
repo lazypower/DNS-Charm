@@ -33,11 +33,9 @@ class BindProvider(object):
         # if it has contents)
         if not os.path.exists('/etc/bind/db.%s' % domain):
             self.first_setup(zp, domain)
-        zp.save()
+            zp.save()
 
-    def add_record(self, domain='example.com', record={}):
-        if not record:
-            log('No record dictionary found, returning')
+    def add_record(self, record, domain='example.com'):
         zp = ZoneParser(domain)
         zp.dict_to_zone(record)
         zp.save()

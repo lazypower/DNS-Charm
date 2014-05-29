@@ -67,18 +67,9 @@ class ZoneParser(object):
             return True
         return False
 
-    def __validate_attributes(self, configuration):
-            if configuration['type'] not in self.implemented_records:
-                raise KeyError("Unknown key %s" % configuration['type'])
-
     def id_generator(self, size=6):
         chars = string.ascii_uppercase + string.digits
         return ''.join(random.choice(chars) for _ in range(size))
-
-    def __is_path(self, file_handle):
-        if os.path.sep in file_handle:
-            return True
-        return False
 
     # #######################################
     # Parsing Array to Zone Dictionary - this is going
@@ -104,18 +95,6 @@ class ZoneParser(object):
             alias = "@"
         parsed = {'ttl': ttl, 'addr': addr, 'alias': alias}
         self.zone.a(parsed)
-
-    def aaaa_from_array(self, data):
-        self.sanity(data)
-
-        ttl = data[4].strip().split(' IN')[0]
-        addr = data[6].strip()
-        try:
-            alias = self.tldxtr(data[0].strip()).subdomain
-        except:
-            alias = "@"
-        parsed = {'ttl': ttl, 'addr': addr, 'alias': alias}
-        self.zone.aaaa(parsed)
 
     def update_cname(self, data):
         self.zone.cname(data)
@@ -213,9 +192,6 @@ class ZoneParser(object):
     def dict_to_zone(self, record):
         if 'rr' in record.keys():
             for case in switch(record['rr']):
-                if case('A'):
-                    self.update_a(record)
-                    break
                 if case('NS'):
                     self.update_ns(record)
                     break
@@ -224,6 +200,9 @@ class ZoneParser(object):
                     break
                 if case('CNAME'):
                     self.update_cname(record)
+                    break
+                if case('A'):
+                    self.update_a(record)
                     break
                 if case():
                     pass

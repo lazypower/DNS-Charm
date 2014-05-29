@@ -47,6 +47,10 @@ class TestZone(unittest.TestCase):
         self.assertEqual(z.cname(), [])
         self.assertEqual(z.cname(record),
                          [{'ttl': 300, 'addr': 'abc.foo.com', 'alias': 'd'}])
+        # assert that value pops and gets updated
+        record = {'ttl': 300, 'addr': 'def.foo.com', 'alias': 'd'}
+        self.assertEqual(z.cname(record), [{'ttl': 300, 'addr': 'def.foo.com',
+                         'alias': 'd'}])
 
     def test_ns_getset(self):
         z = Zone()
@@ -54,6 +58,9 @@ class TestZone(unittest.TestCase):
         self.assertEqual(z.ns(), [])
         self.assertEqual(z.ns(record),
                          [{'addr': '10.0.0.1', 'alias': 'example.com.'}])
+        record = {'alias': 'example.com.', 'addr': '10.0.0.2'}
+        self.assertEqual(z.ns(record),
+                         [{'addr': '10.0.0.2', 'alias': 'example.com.'}])
 
     def test_ptr_getset(self):
         z = Zone()
@@ -77,6 +84,18 @@ class TestZone(unittest.TestCase):
                            'update-retry': '15m',
                            'expiry': '3w',
                            'minimum': '3h'}])
+        record = {'ttl': '@', 'addr': 'ns1.example.com.',
+                  'owner': 'hostmaster.example.com', 'serial': '2003080800',
+                  'refresh': '12h', 'update-retry': '15m', 'expiry': '3w',
+                  'minimum': '4h'}
+        self.assertEqual(z.soa(record),
+                         [{'ttl': '@', 'addr': 'ns1.example.com.',
+                           'owner': 'hostmaster.example.com',
+                           'serial': '2003080800',
+                           'refresh': '12h',
+                           'update-retry': '15m',
+                           'expiry': '3w',
+                           'minimum': '4h'}])
 
     def test_spf_getset(self):
         z = Zone()
@@ -109,3 +128,29 @@ class TestZone(unittest.TestCase):
         self.assertEqual(z.txt(record),
                          [{'alias': 'joe',
                            'txt': '"Located in a black hole" " somewhere"'}])
+
+    @patch('builtins.open' if sys.version_info > (3,) else '__builtin__.open')
+    @patch('contrib.bind.zone.jinja2.Template.render')
+    def test_to_file(self, tm, mopen):
+        mopen.return_value.__enter__ = lambda s: s
+        mopen.return_value.__exit__ = Mock()
+        mopen.return_value.write = Mock()
+        z = Zone()
+        z.read_template = Mock()
+        z.read_template.return_value = "hi {{data}}"
+        z.to_file()
+        z.read_template.assert_called_once()
+        mopen.assert_called_with('/etc/bind/db.example.com', 'w')
+        tm.assert_called_with(data={'soa': [], 'aaaa': [], 'txt': [],
+          'ptr': [], 'spf': [], 'a': [], 'cert': [], 'cname': [], 'srv': [],
+          'caa': [], 'ns': []})
+
+
+    @patch.dict('os.environ', {'CHARM_DIR': '/tmp/foo'})
+    @patch('builtins.open' if sys.version_info > (3,) else '__builtin__.open')
+    def test_read_template(self, mopen):
+        mopen.return_value.__enter__ = lambda s: s
+        mopen.return_value.__exit__ = Mock()
+        mopen.return_value.read.return_value = "{{foo}}"
+        z = Zone()
+        self.assertEqual(z.read_template(), "{{foo}}")

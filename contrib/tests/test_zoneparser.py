@@ -23,31 +23,44 @@ class TestZoneParser(unittest.TestCase):
         zp = ZoneParser('example.com')
         self.assertIn('aaaa', zp.implemented_records)
 
-    @patch('contrib.bind.zoneparser.tldextract.extract')
-    @patch('subprocess.call')
-    @patch('os.path.exists')
     @patch('builtins.open' if sys.version_info > (3,) else '__builtin__.open')
-    def test_from_file(self, mopen, mose, spcm, tldem):
+    def test_from_file(self, mopen):
         mopen.return_value.__enter__ = lambda s: s
         mopen.return_value.__exit__ = Mock()
         mopen.return_value.readlines.return_value = self.ez
-        mose.return_value = True
-        tldem.return_value('example.com')
         zp = ZoneParser('ns')
-        self.assertTrue(len(zp.contents) == 5)
+        zp.normalize_contents = Mock()
+        zp.normalize_contents.return_value = self.ez
+        self.assertEqual(zp.from_file(), self.ez)
+
+    @patch('builtins.open' if sys.version_info > (3,) else '__builtin__.open')
+    def test_from_file_exception(self, mopen):
+        mopen.return_value.__enter__ = lambda s: s
+        mopen.return_value.__exit__ = Mock()
+        mopen.return_value.readlines = Mock(side_effect=OSError('Intentional'))
+        zp = ZoneParser('foo.com')
+        zp.normalize_contents = Mock()
+        zp.normalize_contents.return_value = self.ez
+        self.assertEqual(zp.from_file(), [])
+
+    def test_id_generator(self):
+        zp = ZoneParser('foo.com')
+        self.assertTrue(len(zp.id_generator(6)) == 6)
+
+    def test_sanity(self):
+        zp = ZoneParser('foo.com')
 
     @patch('contrib.bind.zoneparser.ZoneParser.a_from_array')
-    @patch('contrib.bind.zoneparser.ZoneParser.aaaa_from_array')
     @patch('contrib.bind.zoneparser.ZoneParser.cname_from_array')
     @patch('contrib.bind.zoneparser.ZoneParser.ns_from_array')
     @patch('contrib.bind.zoneparser.ZoneParser.soa_from_array')
-    def test_array_to_zone(self, soam, nsm, cnm, aam, am):
+    def test_array_to_zone(self, soam, nsm, cnm, am):
         zp = ZoneParser('example.com')
         zp.contents = self.ez
         zp.array_to_zone()
         soam.assert_called_with(self.ez[0].split())
         nsm.assert_called_with(self.ez[1].split())
-        # cnm.assert_called_with(self.ez[4].split('\t'))
+        cnm.assert_called_with(self.ez[3].split())
         am.assert_called_with(self.ez[4].split())
 
     def test_soa_from_array(self):
@@ -79,6 +92,9 @@ class TestZoneParser(unittest.TestCase):
                                                   'addr': '10.0.3.103',
                                                   'alias': ''}])
 
+
+
+
     @patch('contrib.bind.zone.Zone.to_file')
     def test_save(self, fwm):
         zp = ZoneParser('example.com')
@@ -99,3 +115,24 @@ class TestZoneParser(unittest.TestCase):
         zp.normalize_contents()
         spm.assert_called_with(['named-checkzone', '-o', '/tmp/ABC123',
                                 'example.com', '/etc/bind/db.example.com'])
+
+    def test_find_type(self):
+        zp = ZoneParser('example.com')
+        self.assertEqual(zp.find_type(['foo', 'bar', 'baz', 'CNAME']), 3)
+        self.assertEqual(zp.find_type(['foo', 'bar', 'baz']), -1)
+
+    def test_dict_to_zone(self):
+        zp = ZoneParser('example.com')
+        zp.update_ns = Mock()
+        zp.update_soa = Mock()
+        zp.update_cname = Mock()
+        zp.update_a = Mock()
+        zp.dict_to_zone({'rr': 'NS'})
+        zp.update_ns.assert_called_with({'rr': 'NS'})
+        zp.dict_to_zone({'rr': 'SOA'})
+        zp.update_soa.assert_called_with({'rr': 'SOA'})
+        zp.dict_to_zone({'rr': 'CNAME'})
+        zp.update_cname.assert_called_with({'rr': 'CNAME'})
+        zp.dict_to_zone({'rr': 'A'})
+        zp.update_a.assert_called_with({'rr': 'A'})
+        zp.dict_to_zone({'rr': 'NOPE'})

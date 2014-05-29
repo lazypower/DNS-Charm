@@ -84,7 +84,7 @@ class Zone(object):
         if not value:
             return self.contents['soa']
         else:
-            if len(self.contents['soa']) > 1:
+            if len(self.contents['soa']) > 0:
                 self.contents['soa'].pop(-1)
             self.contents['soa'].append(value)
             return self.contents['soa']
@@ -115,13 +115,16 @@ class Zone(object):
     # ############
 
     def to_file(self, filepath='/etc/bind/db.example.com'):
-        with open('%s/contrib/bind/templates/zone.jinja2' %
-                  os.environ['CHARM_DIR']) as f:
-            contents = f.read()
+        contents = self.read_template()
         t = jinja2.Template(contents)
 
         with open('%s' % filepath, 'w') as f:
             f.write(t.render(data=self.contents))
+
+    def read_template(self):
+        with open('%s/contrib/bind/templates/zone.jinja2' %
+                  os.environ['CHARM_DIR']) as f:
+            return f.read()
 
     # #############
     # Utility methods
