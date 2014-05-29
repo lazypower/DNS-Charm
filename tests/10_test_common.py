@@ -2,8 +2,6 @@ import sys
 import os
 import urllib2
 
-print sys.path
-
 import unittest
 from mock import (
     patch,
