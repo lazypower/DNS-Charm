@@ -43,4 +43,4 @@ class ProgrammableBroken(object):
 
 
 if __name__ == '__main__':
-    c = ProgrammableChanged()
+    c = ProgrammableBroken()
