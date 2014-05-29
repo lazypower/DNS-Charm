@@ -1,0 +1,38 @@
+#!/usr/bin/python
+import os
+import sys
+# Add charmhelpers to the system path.
+try:
+    sys.path.insert(0, os.path.abspath(os.path.join(os.environ['CHARM_DIR'],
+                                                    'lib')))
+    sys.path.insert(0, os.path.abspath(os.path.join(os.environ['CHARM_DIR'],
+                                                    'contrib')))
+except:
+    sys.path.insert(0, os.path.abspath(os.path.join('..', 'lib')))
+    sys.path.insert(0, os.path.abspath(os.path.join('..', 'contrib')))
+
+
+from bind.provider import BindProvider
+
+from charmhelpers.core.hookenv import (
+    log,
+    config,
+    unit_get,
+    relation_get,
+)
+
+class ProgrammableBroken(object):
+
+    def remove_record(self):
+        domain = relation_get('domain')
+        alias = relation_get('alias')
+        addr = relation_get('addr')
+        rr = relation_get('rr').upper()
+
+        parsed = {'domain': domain, 'alias': alias, 'addr': addr, 'rr': rr}
+
+        if self.config['provider'] == 'bind':
+            bp = BindProvider()
+            bp.remove_record(domain, parsed)
+
+
