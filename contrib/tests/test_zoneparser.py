@@ -140,3 +140,44 @@ class TestZoneParser(unittest.TestCase):
         zp.dict_to_zone({'rr': 'A'})
         zp.update_a.assert_called_with({'rr': 'A'})
         zp.dict_to_zone({'rr': 'NOPE'})
+
+    @patch('builtins.open' if sys.version_info > (3,) else '__builtin__.open')
+    def test_read_default_zones(self, mopen):
+        seed_zone = """zone "255.in-addr.arpa" {
+    type master;
+    file "/etc/bind/db.255";
+};"""
+        mopen.return_value.__enter__ = lambda s: s
+        mopen.return_value.__exit__ = Mock()
+        mopen.return_value.readlines.return_value = seed_zone.split('\n')
+        zp = ZoneParser('example.com')
+        self.assertEqual(zp.read_default_zones(), seed_zone.split('\n'))
+
+    @patch('builtins.open' if sys.version_info > (3,) else '__builtin__.open')
+    def test_write_default_zones(self, mopen):
+        seed_zone = """zone "255.in-addr.arpa" {
+    type master;
+    file "/etc/bind/db.255";
+};"""
+        mopen.return_value.__enter__ = lambda s: s
+        mopen.return_value.__exit__ = Mock()
+        mopen.return_value.write = Mock()
+        made_config = seed_zone.split('\n').append(['hello'])
+        zp = ZoneParser('example.com')
+        zp.write_default_zones(made_config)
+        mopen.return_value.write.assert_called_with(made_config)
+
+    def test_exists_in_default_zones(self):
+        seed_zone = """zone "example.com" {
+    type master;
+    file "/etc/bind/db.example.com";
+};""" 
+        zp = ZoneParser('example.com')
+        self.assertEqual(zp.exists_in_default_zones(seed_zone.split('\n')), 0)
+        zp = ZoneParser('nope.com')
+        self.assertEqual(zp.exists_in_default_zones(seed_zone.split('\n')), -1)
+
+    def test_add_to_default_zones():
+        zp = ZoneParser('example.com')
+        zp.exists_in_default_zones = Mock()
+        zp.

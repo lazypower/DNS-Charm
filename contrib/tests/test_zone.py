@@ -147,7 +147,6 @@ class TestZone(unittest.TestCase):
           'PTR': [], 'SPF': [], 'A': [], 'CERT': [], 'CNAME': [], 'SRV': [],
           'CAA': [], 'NS': []})
 
-
     @patch.dict('os.environ', {'CHARM_DIR': '/tmp/foo'})
     @patch('builtins.open' if sys.version_info > (3,) else '__builtin__.open')
     def test_read_template(self, mopen):
@@ -156,7 +155,6 @@ class TestZone(unittest.TestCase):
         mopen.return_value.read.return_value = "{{foo}}"
         z = Zone()
         self.assertEqual(z.read_template(), "{{foo}}")
-
 
     def test_remove(self):
         z = Zone()
