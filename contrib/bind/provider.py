@@ -1,4 +1,5 @@
 import os
+import subprocess
 import sys
 from .zoneparser import ZoneParser
 from random import randint
@@ -10,7 +11,7 @@ try:
 except:
     sys.path.insert(0, os.path.abspath(os.path.join('..', '..', 'lib')))
 
-from charmhelpers.core.hookenv import open_port, log, unit_get
+from charmhelpers.core.hookenv import open_port, unit_get
 
 from charmhelpers.fetch import (
     apt_install,
@@ -35,16 +36,19 @@ class BindProvider(object):
         if not os.path.exists('/etc/bind/db.%s' % domain):
             self.first_setup(zp, domain)
             zp.save()
+            self.reload_config()
 
     def add_record(self, record, domain='example.com'):
         zp = ZoneParser(domain)
         zp.dict_to_zone(record)
         zp.save()
+        self.reload_config()
 
     def remove_record(self, record, domain='example.com'):
         zp = ZoneParser(domain)
         zp.zone.remove(record['rr'], 'alias', record['alias'])
         zp.save()
+        self.reload_config()
 
     def first_setup(self, parser, domain='example.com'):
         # Insert SOA and NS records
@@ -65,3 +69,6 @@ class BindProvider(object):
                              'ttl': 300})
         parser.dict_to_zone({'rr': 'CNAME', 'alias': 'ns',
                              'addr': 'ns1.example.com.', 'ttl': 300})
+
+    def reload_config(self):
+        subprocess.call(['rndc', 'reload', self.domain])

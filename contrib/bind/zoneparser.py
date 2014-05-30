@@ -215,16 +215,17 @@ class ZoneParser(object):
     # #######
 
     def add_to_default_zones(self):
-        zones = self.default_zones_config()
+        zones = self.read_default_zones()
         if self.exists_in_default_zones(zones) != -1:
             logging.info("Zone found, returning")
             return
-        addition = ['zone "%s"' % self.domain,
+        addition = ['zone "%s" {' % self.domain,
                     '    type master;',
                     '    file "%s";' % self.zonefile,
-                    "};"]
-        zones.append(addition)
-        self.write_default_zones(zones)
+                    "};"
+                    ""]
+        self.write_default_zones(addition)
+        # Tell bind to refresh zone configuration
 
     def exists_in_default_zones(self, zones):
         logging.info("Searching for %s" % self.domain)
@@ -239,8 +240,8 @@ class ZoneParser(object):
         return default_zones
 
     def write_default_zones(self, config):
-        with open('/etc/bind/named.conf.default-zones', 'w') as f:
-            f.write(config)
+        with open('/etc/bind/named.conf.default-zones', 'a') as f:
+            f.write('\n'.join(config))
 
 
 # Python doesn't give us a switch case statement, so replicate it here.
