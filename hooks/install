@@ -38,7 +38,8 @@ class Install(object):
             'make',
             ], fatal=True)
 
-        subprocess.call(['make', 'setup'])
+        subprocess.call(['pip', 'install', '-r', 'requirements.txt',
+                         '--upgrade'])
 
     def sanity_check(self):
         if not config()['domain']:
