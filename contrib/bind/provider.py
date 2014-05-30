@@ -12,6 +12,7 @@ except:
     sys.path.insert(0, os.path.abspath(os.path.join('..', '..', 'lib')))
 
 from charmhelpers.core.hookenv import open_port, unit_get
+from charmhelpers.core.host import service_reload
 
 from charmhelpers.fetch import (
     apt_install,
@@ -71,4 +72,4 @@ class BindProvider(object):
                              'addr': 'ns1.example.com.', 'ttl': 300})
 
     def reload_config(self):
-        subprocess.call(['rndc', 'reload', self.domain])
+        service_reload('bind9')

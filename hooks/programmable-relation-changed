@@ -15,17 +15,21 @@ except:
 from bind.provider import BindProvider
 
 from charmhelpers.core.hookenv import (
-    log,
     config,
     unit_get,
     relation_get,
+    relation_set,
+    relation_id,
 )
+
 
 class ProgrammableChanged(object):
 
     def __init__(self):
         self.config = config()
         self.provider = self.determine_provider()
+        relid = relation_id()
+        relation_set(relid, {'public-address': unit_get('public-address')})
 
     def determine_provider(self):
         domain = relation_get('domain')
@@ -37,7 +41,7 @@ class ProgrammableChanged(object):
 
         if self.config['provider'] == 'bind':
             bp = BindProvider()
-            bp.add_record(domain, parsed)
+            bp.add_record(parsed, domain)
 
 
 if __name__ == '__main__':
