@@ -10,7 +10,7 @@ bin/charm_helpers_sync.py:
 
 test: clean
 	@echo "Starting tests..."
-	@nosetests tests --with-coverage --cover-package=hooks
+	@nosetests tests --with-coverage --cover-package=lib 
 
 test_contrib: clean
 	@echo "Testing Contributed Modules"
