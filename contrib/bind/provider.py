@@ -9,14 +9,15 @@ try:
 except:
     sys.path.insert(0, os.path.abspath(os.path.join('..', '..', 'lib')))
 
-from charmhelpers.core.hookenv import open_port, unit_get, config
+from charmhelpers.core.hookenv import open_port, unit_get, config, log
 from charmhelpers.core.host import service_reload
 
 from charmhelpers.fetch import (
     apt_install,
     apt_update,
 )
-from common import install_packages
+from common import install_packages, pip_install
+from zoneparser import ZoneParser
 
 
 class BindProvider(object):
@@ -29,12 +30,14 @@ class BindProvider(object):
                 'dnsutils',
                 ], fatal=True)
         else:
+            log("Installing offline debian packages")
             install_packages('files/bind')
+            log("Installing Python packages")
+            pip_install('files/bind/pip')
 
         open_port(53)
 
     def config_changed(self, domain='example.com'):
-        from .zoneparser import ZoneParser
         zp = ZoneParser(domain)
         # Install a skeleton bind zone, rehashes existing file
         # if it has contents)
@@ -44,14 +47,12 @@ class BindProvider(object):
             self.reload_config()
 
     def add_record(self, record, domain='example.com'):
-        from .zoneparser import ZoneParser
         zp = ZoneParser(domain)
         zp.dict_to_zone(record)
         zp.save()
         self.reload_config()
 
     def remove_record(self, record, domain='example.com'):
-        from .zoneparser import ZoneParser
         zp = ZoneParser(domain)
         zp.zone.remove(record['rr'], 'alias', record['alias'])
         zp.save()
