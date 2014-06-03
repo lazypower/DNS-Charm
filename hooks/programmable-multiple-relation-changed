@@ -33,7 +33,7 @@ class ProgrammableChanged(object):
 
     def add_resource(self):
         domain = relation_get('domain')
-        resources = relation_get('resources')
+        resources = relation_get('resources').split('\n')
 
         if self.config['provider'] == 'bind':
             bp = BindProvider()
