@@ -13,13 +13,12 @@ except:
 from charmhelpers.core.hookenv import (
     log,
     config,
-    unit_get,
 )
 
 
 def sanity_check():
-    if not config()['canonical_domain']:
-        log("No Canonical Domain specified - Aborting until configured")
+    if not config()['domain']:
+        log("No Base Domain specified - Aborting until configured")
         # It's reasonable to assume we're not doing anything useful at this
         # point, as we are unconfigured. Abort doing *anything*
         return False
@@ -31,6 +30,13 @@ def install_packages(path):
     for pkg in packages:
         pkg = "%s/%s" % (path, pkg)
         subprocess.call(['dpkg', '-i', pkg])
+
+
+def pip_install(path):
+    packages = os.listdir(path)
+    for pkg in packages:
+        pkg = "%s/%s" % (path, pkg)
+        subprocess.call(['pip', 'install', pkg])
 
 
 # Parse existing nameservers from resolv.conf
