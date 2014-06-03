@@ -11,6 +11,6 @@ provides:
   programmable:
     interface: DNS
   programmable-multiple:
-    interface: DNS
+    interface: DNS-MULTI
   auto-generated:
     interface: DNS
