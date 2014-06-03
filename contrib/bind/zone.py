@@ -14,6 +14,7 @@ class Zone(object):
             'CAA': [],
             'CERT': [],
             'CNAME': [],
+            'NAPTR': [],
             'NS': [],
             'PTR': [],
             'SOA': [],
@@ -72,6 +73,16 @@ class Zone(object):
                 self.contents['NS'].pop(idx)
             self.contents['NS'].append(value)
             return self.contents['NS']
+
+    def naptr(self, value=None):
+        if not value:
+            return self.contents['NAPTR']
+        else:
+            # idx = self.find(self.contents['NAPTR'], 'alias', value['alias'])
+            # if idx != -1:
+            #     self.contents['NAPTR'].pop(idx)
+            self.contents['NAPTR'].append(value)
+            return self.contents['NAPTR']
 
     def ptr(self, value=None):
         if not value:

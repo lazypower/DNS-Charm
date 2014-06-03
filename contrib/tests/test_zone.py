@@ -145,7 +145,7 @@ class TestZone(unittest.TestCase):
         mopen.assert_called_with('/etc/bind/db.example.com', 'w')
         tm.assert_called_with(data={'SOA': [], 'AAAA': [], 'TXT': [],
           'PTR': [], 'SPF': [], 'A': [], 'CERT': [], 'CNAME': [], 'SRV': [],
-          'CAA': [], 'NS': []})
+          'CAA': [], 'NS': [], 'NAPTR': []})
 
     @patch.dict('os.environ', {'CHARM_DIR': '/tmp/foo'})
     @patch('builtins.open' if sys.version_info > (3,) else '__builtin__.open')
