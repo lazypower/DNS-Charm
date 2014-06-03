@@ -115,7 +115,7 @@ class TestZoneParser(unittest.TestCase):
                                                     'priority': '0',
                                                     'weight': '0',
                                                     'port': '5060',
-                                                    'record': 'bono-0'}])
+                                                    'target': 'bono-0'}])
 
     @patch('builtins.open' if sys.version_info > (3,) else '__builtin__.open')
     @patch('contrib.bind.zone.Zone.to_file')
