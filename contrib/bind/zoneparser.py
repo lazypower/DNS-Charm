@@ -155,11 +155,11 @@ class ZoneParser(object):
                   'expiry': expiry, 'minimum': minimum}
         self.zone.soa(parsed)
 
-    def array_to_zone(self):
-        if not self.contents:
-            return
+    def array_to_zone(self, blob=None):
+        if not blob:
+            blob = self.contents
 
-        for entry in self.contents:
+        for entry in blob:
             line = entry.split()
             dclass = line[3].strip()
             for case in switch(dclass):

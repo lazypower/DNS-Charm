@@ -33,15 +33,11 @@ class ProgrammableChanged(object):
 
     def add_resource(self):
         domain = relation_get('domain')
-        alias = relation_get('alias')
-        addr = relation_get('addr')
-        rr = relation_get('rr').upper()
-
-        parsed = {'domain': domain, 'alias': alias, 'addr': addr, 'rr': rr}
+        resources = relation_get('resources')
 
         if self.config['provider'] == 'bind':
             bp = BindProvider()
-            bp.add_record(parsed, domain)
+            bp.add_record(resources, domain)
 
 
 if __name__ == '__main__':

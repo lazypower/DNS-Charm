@@ -48,9 +48,17 @@ class BindProvider(object):
 
     def add_record(self, record, domain='example.com'):
         zp = ZoneParser(domain)
-        zp.dict_to_zone(record)
+        if type(record) is dict:
+            zp.dict_to_zone(record)
+        elif type(record) is list:
+            zp.array_to_zone(record)
+        else:
+            raise TypeError("Unsupported type for resource %d" % type(record))
         zp.save()
         self.reload_config()
+
+    def add_multiple_records(self, resource, domain='example.com'):
+        pass
 
     def remove_record(self, record, domain='example.com'):
         zp = ZoneParser(domain)
