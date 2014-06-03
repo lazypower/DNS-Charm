@@ -141,9 +141,9 @@ class ZoneParser(object):
         priority = data[3]
         weight = data[4]
         port = data[5]
-        record = data[6]
+        target = data[6]
         parsed = {'alias': alias, 'priority': priority, 'weight': weight,
-                  'port': port, 'record': record}
+                  'port': port, 'target': target}
         self.zone.srv(parsed)
 
     def update_soa(self, data):
@@ -185,7 +185,8 @@ class ZoneParser(object):
 
         for entry in blob:
             line = entry.split()
-            dclass = line[3].strip()
+            rrtype = self.find_type(line)
+            dclass = line[rrtype].strip()
             for case in switch(dclass):
                 if case('AAAA'):
                     self.aaaa_from_array(line)
@@ -201,6 +202,9 @@ class ZoneParser(object):
                     break
                 if case('SOA'):
                     self.soa_from_array(line)
+                    break
+                if case('SRV'):
+                    self.srv_from_array(line)
                     break
                 if case('A'):
                     self.a_from_array(line)
