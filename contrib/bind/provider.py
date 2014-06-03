@@ -62,7 +62,7 @@ class BindProvider(object):
 
     def remove_record(self, record, domain='example.com'):
         zp = ZoneParser(domain)
-        zp.zone.remove(record['rr'], 'alias', record['alias'])
+        zp.zone.remove('alias', record['rr'], record['alias'])
         zp.save()
         self.reload_config()
 
