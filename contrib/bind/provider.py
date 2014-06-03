@@ -1,7 +1,5 @@
 import os
-import subprocess
 import sys
-from .zoneparser import ZoneParser
 from random import randint
 
 # Add charmhelpers to the system path.
@@ -11,26 +9,32 @@ try:
 except:
     sys.path.insert(0, os.path.abspath(os.path.join('..', '..', 'lib')))
 
-from charmhelpers.core.hookenv import open_port, unit_get
+from charmhelpers.core.hookenv import open_port, unit_get, config
 from charmhelpers.core.host import service_reload
 
 from charmhelpers.fetch import (
     apt_install,
     apt_update,
 )
+from common import install_packages
 
 
 class BindProvider(object):
 
     def install(self):
-        apt_update(fatal=True)
-        apt_install(packages=[
-            'bind9',
-            'dnsutils',
-            ], fatal=True)
+        if config()['offline'] is False:
+            apt_update(fatal=True)
+            apt_install(packages=[
+                'bind9',
+                'dnsutils',
+                ], fatal=True)
+        else:
+            install_packages('files/bind')
+
         open_port(53)
 
     def config_changed(self, domain='example.com'):
+        from .zoneparser import ZoneParser
         zp = ZoneParser(domain)
         # Install a skeleton bind zone, rehashes existing file
         # if it has contents)
@@ -40,12 +44,14 @@ class BindProvider(object):
             self.reload_config()
 
     def add_record(self, record, domain='example.com'):
+        from .zoneparser import ZoneParser
         zp = ZoneParser(domain)
         zp.dict_to_zone(record)
         zp.save()
         self.reload_config()
 
     def remove_record(self, record, domain='example.com'):
+        from .zoneparser import ZoneParser
         zp = ZoneParser(domain)
         zp.zone.remove(record['rr'], 'alias', record['alias'])
         zp.save()

@@ -7,3 +7,7 @@ options:
     type: string
     default: "bind"
     description: "Used to specify the provider to deploy/consume for DNS management"
+  offline:
+    type: boolean
+    default: "true"
+    description: "Specify offline env configuration, and install from local filepath instead of via apt"

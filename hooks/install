@@ -22,6 +22,7 @@ from charmhelpers.fetch import (
     apt_install,
     apt_update,
 )
+from common import install_packages
 
 
 class Install(object):
@@ -32,14 +33,18 @@ class Install(object):
             return 0
 
         # TODO: Check offline, install fatpack
-        apt_update(fatal=True)
-        apt_install(packages=[
-            'python-pip',
-            'make',
-            ], fatal=True)
+        if config()['offline'] is False:
+            apt_update(fatal=True)
+            apt_install(packages=[
+                'python-pip',
+                'make',
+                ], fatal=True)
 
-        subprocess.call(['pip', 'install', '-r', 'requirements.txt',
-                         '--upgrade'])
+            subprocess.call(['pip', 'install', '-r', 'requirements.txt',
+                             '--upgrade'])
+        else:
+            log('Installing Core Packages from Offline Pack')
+            install_packages('files/core')
 
     def sanity_check(self):
         if not config()['domain']:

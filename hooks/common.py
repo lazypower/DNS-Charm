@@ -1,7 +1,6 @@
 import os
 import sys
-import urllib2
-import tldextract
+import subprocess
 
 # Add charmhelpers to the system path.
 try:
@@ -17,11 +16,6 @@ from charmhelpers.core.hookenv import (
     unit_get,
 )
 
-from charmhelpers.fetch import (
-    apt_install,
-    apt_update,
-)
-
 
 def sanity_check():
     if not config()['canonical_domain']:
@@ -32,9 +26,11 @@ def sanity_check():
     return True
 
 
-# ###########
-# Environment Probing / Modifications
-# ###########
+def install_packages(path):
+    packages = os.listdir(path)
+    for pkg in packages:
+        pkg = "%s/%s" % (path, pkg)
+        subprocess.call(['dpkg', '-i', pkg])
 
 
 # Parse existing nameservers from resolv.conf
@@ -46,15 +42,3 @@ def existing_nameservers():
             if line.find('nameserver') != -1:
                 dns_servers.append(line.replace('nameserver ', '').rstrip())
     return dns_servers
-
-
-# this is kind of arbitrary, attempt to connect to a google ip address.
-# This won't be the best solution, but i'm open to ideas on how to improve
-# 'onlineability' checking.
-def am_i_online():
-    try:
-        urllib2.urlopen('http://74.125.228.100', timeout=1)
-        return True
-    except urllib2.URLError:
-        pass
-    return False
