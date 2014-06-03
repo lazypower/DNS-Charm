@@ -122,6 +122,30 @@ class ZoneParser(object):
         parsed = {'ttl': ttl, 'alias': alias, 'addr': addr}
         self.zone.ns(parsed)
 
+    def naptr_from_array(self, data):
+        self.sanity(data)
+        alias = data[0]
+        order = data[3]
+        pref = data[4]
+        flag = data[5]
+        params = data[6]
+        regexp = data[7]
+        replace = data[8]
+        parsed = {'alias': alias, 'order': order, 'pref': pref, 'flag': flag,
+                  'params': params, 'regexp': regexp, 'replace': replace}
+        self.zone.naptr(parsed)
+
+    def srv_from_array(self, data):
+        self.sanity(data)
+        alias = data[0]
+        priority = data[3]
+        weight = data[4]
+        port = data[5]
+        record = data[6]
+        parsed = {'alias': alias, 'priority': priority, 'weight': weight,
+                  'port': port, 'record': record}
+        self.zone.srv(parsed)
+
     def update_soa(self, data):
         self.zone.soa(data)
 
@@ -171,6 +195,9 @@ class ZoneParser(object):
                     break
                 if case('NS'):
                     self.ns_from_array(line)
+                    break
+                if case('NAPTR'):
+                    self.naptr_from_array(line)
                     break
                 if case('SOA'):
                     self.soa_from_array(line)

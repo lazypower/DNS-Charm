@@ -95,7 +95,27 @@ class TestZoneParser(unittest.TestCase):
                                                   'addr': '10.0.3.103',
                                                   'alias': ''}])
 
+    def test_naptr_from_array(self):
+        zp = ZoneParser('example.com')
+        zcontents = '@ IN NAPTR 1 1 "S" "SIP+D2T" "" _sip._tcp'.split(' ')
+        zp.naptr_from_array(zcontents)
+        self.assertEqual(zp.zone.contents['NAPTR'], [{'alias': '@', 
+                                                      'order': '1',
+                                                      'pref': '1',
+                                                      'flag': '"S"',
+                                                      'params': '"SIP+D2T"',
+                                                      'regexp': '""',
+                                                      'replace': '_sip._tcp'}])
 
+    def test_srv_from_array(self):
+        zp = ZoneParser('example.com')
+        zcontents = '_sip._udp IN SRV 0 0 5060 bono-0'.split(' ')
+        zp.srv_from_array(zcontents)
+        self.assertEqual(zp.zone.contents['SRV'], [{'alias': '_sip._udp',
+                                                    'priority': '0',
+                                                    'weight': '0',
+                                                    'port': '5060',
+                                                    'record': 'bono-0'}])
 
     @patch('builtins.open' if sys.version_info > (3,) else '__builtin__.open')
     @patch('contrib.bind.zone.Zone.to_file')

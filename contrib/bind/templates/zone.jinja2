@@ -20,4 +20,9 @@ $TTL    604800
 {%- for record in data['CNAME'] %}
 {{record['alias']}}     	IN      CNAME	{{record['addr']}}
 {% endfor %}
-
+{%- for record in data['NAPTR'] %}
+{{record['alias']}}	IN 	NAPTR	{{record['order']}}	{{record['pref']}}	{{record['flag']}}	{{record['params']}}	{{record['regexp']}}	{{record['replace']}}
+{% endfor %}
+{%- for record in data['SRV'] %}
+{{record['alias']}}	{{record['class']}}	SRV 	{{record['priority']}}	{{record['weight']}}	{{record['port']}}	{{record['target']}}
+{% endfor %}
