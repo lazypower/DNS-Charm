@@ -1,6 +1,5 @@
 import sys
 import os
-import urllib2
 
 import unittest
 from mock import (
@@ -9,25 +8,25 @@ from mock import (
 )
 
 sys.path.insert(0, os.path.abspath(os.path.join('..', 'lib', 'charmhelpers')))
-
-from hooks import common
+sys.path.insert(0, os.path.abspath(os.path.join('..', 'lib')))
+from lib import common
 
 
 class TestCommon(unittest.TestCase):
 
-    @patch('hooks.common.config')
-    @patch('hooks.common.log')
+    @patch('lib.common.config')
+    @patch('lib.common.log')
     def test_sanity_check_configured(self, lmock, cfgmock):
         cfgmock.return_value = {'assume_provider': True,
-                                'canonical_domain': 'example.com'}
+                                'domain': 'example.com'}
         self.assertTrue(common.sanity_check())
         cfgmock.assert_called_once(common.sanity_check())
 
-    @patch('hooks.common.config')
-    @patch('hooks.common.log')
+    @patch('lib.common.config')
+    @patch('lib.common.log')
     def test_sanity_check_unconfigured(self, lmock, cfgmock):
         cfgmock.return_value = {'assume_provider': True,
-                                'canonical_domain': ''}
+                                'domain': ''}
         self.assertFalse(common.sanity_check())
         cfgmock.assert_called_once(common.sanity_check())
 
@@ -43,12 +42,16 @@ class TestCommon(unittest.TestCase):
         nameservers = common.existing_nameservers()
         self.assertEqual(nameservers, ['127.0.0.1', '10.0.1.1'])
 
-    @patch('hooks.common.urllib2.urlopen')
-    def test_am_i_online(self, urlmock):
-        common.am_i_online()
-        urlmock.assert_called_with('http://74.125.228.100', timeout=1)
+    @patch('os.listdir')
+    @patch('subprocess.call')
+    def test_install_packages(self, spcm, osldm):
+        osldm.return_value = ['foo.deb', 'bar.deb']
+        common.install_packages('/tmp/nope')
+        spcm.assert_called_with(['dpkg', '-i', '/tmp/nope/bar.deb'])
 
-    @patch('hooks.common.urllib2.urlopen')
-    def test_am_i_online_raises_error(self, urlmock):
-        urlmock.side_effect = [urllib2.URLError('nope')]
-        self.assertFalse(common.am_i_online())
+    @patch('os.listdir')
+    @patch('subprocess.call')
+    def test_pip_install(self, spcm, osldm):
+        osldm.return_value = ['foo.tar.gz']
+        common.pip_install('/tmp/nope')
+        spcm.assert_called_with(['pip', 'install', '/tmp/nope/foo.tar.gz'])
