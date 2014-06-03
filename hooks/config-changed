@@ -7,23 +7,23 @@ try:
                                                     'lib')))
     sys.path.insert(0, os.path.abspath(os.path.join(os.environ['CHARM_DIR'],
                                                     'contrib')))
+
 except:
     sys.path.insert(0, os.path.abspath(os.path.join('..', 'lib')))
     sys.path.insert(0, os.path.abspath(os.path.join('..', 'contrib')))
 
 
-from bind.provider import BindProvider
-
 from charmhelpers.core.hookenv import config
+from common import sanity_check
+from bind.provider import BindProvider
 
 
 class ConfigChanged(object):
 
     def __init__(self):
+        if not sanity_check():
+            return 0
         self.config = config()
-        self.provider = self.determine_provider()
-
-    def determine_provider(self):
         if self.config['provider'] == 'bind':
             bp = BindProvider()
             bp.install()
