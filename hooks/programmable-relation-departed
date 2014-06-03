@@ -25,7 +25,7 @@ class ProgrammableBroken(object):
 
     def __init__(self):
         self.config = config()
-        self.provider = self.determine_provider()
+        self.provider = self.remove_record()
 
 
     def remove_record(self):
@@ -38,7 +38,7 @@ class ProgrammableBroken(object):
 
         if self.config['provider'] == 'bind':
             bp = BindProvider()
-            bp.remove_record(domain, parsed)
+            bp.remove_record(parsed, domain)
 
 
 
