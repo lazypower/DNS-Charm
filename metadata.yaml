@@ -10,5 +10,7 @@ subordinate: false
 provides:
   programmable:
     interface: DNS
-  generated:
+  programmable-multiple:
+    interface: DNS
+  auto-generated:
     interface: DNS
