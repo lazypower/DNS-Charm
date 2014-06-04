@@ -23,7 +23,7 @@ Step by step instructions on using the charm:
 
     juju set dns offline=true
 
-You will need to branch the charm locally, and fill the required dependencies. Each dependency should be listed by the provider(s) specific documentation in *docs/provider.md*.
+You will need to branch the charm locally, and fill the required dependencies. Each dependency should be listed by the provider(s) specific documentation in [docs/provider.md](docs/provider.md).
 
 An example Heirarchy:
 
@@ -46,7 +46,7 @@ An example Heirarchy:
 
 The charm in it's current form does not support scale out operations. It's engineered towards a single Bind9 Authoritative master deployment for use in offline environments. 
 
-None of the 3rd party provider support has been added save for the provider architecture outlined in docs/HACKING.md
+None of the 3rd party provider support has been added save for the provider architecture outlined in [docs/HACKING.md](docs/HACKING.md)
 
 # Configuration
 
@@ -58,8 +58,6 @@ None of the 3rd party provider support has been added save for the provider arch
 
 
 # Contact Information
-
-## Upstream Project Name
 
 - http://github.com/chuckbutler/dns
 - http://github.com/chuckbutler/dns/issues
