@@ -9,7 +9,7 @@ This charm provides [DNS](http://en.wikipedia.org/wiki/Domain_Name_System). By d
 
 ### Notes about architecture
 
-The DNS charm implements an abstracted 'provider' concept, to ease integration of new services. Specific instructions how to extend/ add providers is outlined in docs/HACKING.md and docs/CONTRIBUTING.md
+The DNS charm implements an abstracted 'provider' concept, to ease integration of new services. Specific instructions how to extend/ add providers is outlined in docs/HACKING.md 
 
 # Usage
 
