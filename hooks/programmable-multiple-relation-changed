@@ -33,9 +33,12 @@ class ProgrammableChanged(object):
 
     def add_resource(self):
         domain = relation_get('domain')
-        resources = self.sanitize(relation_get('resources'))
-        if not resources:
+        # Do nothing if we didn't receive a RR to process
+        if not relation_get('resources'):
             return
+
+        resources = self.sanitize(relation_get('resources'))
+
         if not domain:
             domain = config()['domain']
 
