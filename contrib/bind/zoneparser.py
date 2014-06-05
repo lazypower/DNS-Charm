@@ -95,6 +95,8 @@ class ZoneParser(object):
             alias = self.tldxtr(data[0].strip()).subdomain
         except:
             alias = "@"
+        if alias == "":
+            alias = "@"
         parsed = {'ttl': ttl, 'addr': addr, 'alias': alias}
         self.zone.a(parsed)
 

@@ -93,7 +93,7 @@ class TestZoneParser(unittest.TestCase):
         zp.a_from_array(zcontents[2].split('\t'))
         self.assertEqual(zp.zone.contents['A'], [{'ttl': '604800',
                                                   'addr': '10.0.3.103',
-                                                  'alias': ''}])
+                                                  'alias': '@'}])
 
     def test_naptr_from_array(self):
         zp = ZoneParser('example.com')
