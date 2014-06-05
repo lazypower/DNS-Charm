@@ -57,9 +57,6 @@ class BindProvider(object):
         zp.save()
         self.reload_config()
 
-    def add_multiple_records(self, resource, domain='example.com'):
-        pass
-
     def remove_record(self, record, domain='example.com'):
         zp = ZoneParser(domain)
         zp.zone.remove('alias', record['rr'], record['alias'])
