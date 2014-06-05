@@ -3,8 +3,18 @@ import os
 import random
 import subprocess
 import string
+import sys
 import tldextract
 from .zone import Zone
+
+try:
+    sys.path.insert(0, os.path.abspath(os.path.join(os.environ['CHARM_DIR'],
+                                                    'lib')))
+except:
+    sys.path.insert(0, os.path.abspath(os.path.join('..', 'lib')))
+
+from common import trim_empty_array_elements as trim
+
 
 # Note about how this is constructed. BIND ships with a tool called
 # named-checkzone. This normalizes ALL output from a bind file, and
@@ -89,10 +99,12 @@ class ZoneParser(object):
 
     def a_from_array(self, data):
         self.sanity(data, 4)
-        ttl = data[4].strip().split(' IN')[0]
+        data = trim(data)
+        print(data)
+        ttl = data[1].strip().split(' IN')[0]
         addr = data[-1].strip()
         try:
-            alias = self.tldxtr(data[0].strip()).subdomain
+            alias = str(self.tldxtr(data[0].strip()).subdomain)
         except:
             alias = "@"
         if alias == "":

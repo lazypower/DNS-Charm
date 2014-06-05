@@ -25,6 +25,12 @@ def sanity_check():
     return True
 
 
+def trim_empty_array_elements(data):
+    val = [line for line in data if line.strip()]
+    print("TRIM: %s" % val)
+    return val
+
+
 def install_packages(path):
     packages = os.listdir(path)
     for pkg in packages:
