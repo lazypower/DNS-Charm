@@ -9,8 +9,8 @@ categories:
 subordinate: false
 provides:
   programmable:
-    interface: DNS
+    interface: dns
   programmable-multiple:
-    interface: DNS-MULTI
+    interface: dns-multi
   auto-generated:
-    interface: DNS
+    interface: dns-auto
