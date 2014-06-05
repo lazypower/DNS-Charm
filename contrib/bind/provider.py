@@ -11,11 +11,8 @@ except:
 
 from charmhelpers.core.hookenv import unit_get
 from charmhelpers.core.host import service_reload
-
-
 from common import resolve_hostname_to_ip
 from zoneparser import ZoneParser
-
 
 class BindProvider(object):
 
