@@ -125,12 +125,12 @@ class ZoneParser(object):
     def naptr_from_array(self, data):
         self.sanity(data)
         alias = data[0]
-        order = data[3]
-        pref = data[4]
-        flag = data[5]
-        params = data[6]
-        regexp = data[7]
-        replace = data[8]
+        order = data[4]
+        pref = data[5]
+        flag = data[6]
+        params = data[7]
+        regexp = data[8]
+        replace = data[9]
         parsed = {'alias': alias, 'order': order, 'pref': pref, 'flag': flag,
                   'params': params, 'regexp': regexp, 'replace': replace}
         self.zone.naptr(parsed)
@@ -138,10 +138,10 @@ class ZoneParser(object):
     def srv_from_array(self, data):
         self.sanity(data)
         alias = data[0]
-        priority = data[3]
-        weight = data[4]
-        port = data[5]
-        target = data[6]
+        priority = data[4]
+        weight = data[5]
+        port = data[6]
+        target = data[7]
         parsed = {'alias': alias, 'priority': priority, 'weight': weight,
                   'port': port, 'target': target}
         self.zone.srv(parsed)

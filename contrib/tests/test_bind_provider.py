@@ -11,29 +11,11 @@ sys.path.insert(0, os.path.abspath(os.path.join('..', '..',
 
 class TestBindProvider(unittest.TestCase):
 
-    @patch('contrib.bind.provider.open_port')
-    @patch('contrib.bind.provider.apt_update')
-    @patch('contrib.bind.provider.apt_install')
-    @patch('contrib.bind.provider.config')
-    @patch('contrib.bind.provider.log')
-    @patch('contrib.bind.provider.install_packages')
-    @patch('contrib.bind.provider.pip_install')
-    def test_install(self, pim, ipm, logm, cfgm, aim, aum, opm):
-        bp = BindProvider()
-        bp.reload_config = Mock()
-        cfgm.return_value={'offline': False, 'domain': 'example.com'}
-        bp.install()
-        aum.assert_called_with(fatal=True)
-        aim.assert_called_with(packages=['bind9', 'dnsutils'], fatal=True)
-        bp.reload_config.assert_called_once()
-        cfgm.return_value={'offline': True, 'domain': 'example.com'}
-        bp.install()
-        pim.assert_called_once()
-        ipm.assert_called_once()
-        bp.reload_config.assert_called_once()
 
+    @patch('subprocess.check_output')
     @patch('contrib.bind.provider.unit_get')
-    def test_first_setup(self, ugm):
+    def test_first_setup(self, ugm, spcom):
+        spcom.return_value = '10.0.0.1'
         bp = BindProvider()
         parser = MagicMock()
         bp.first_setup(parser)

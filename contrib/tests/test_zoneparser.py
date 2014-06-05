@@ -97,7 +97,7 @@ class TestZoneParser(unittest.TestCase):
 
     def test_naptr_from_array(self):
         zp = ZoneParser('example.com')
-        zcontents = '@ IN NAPTR 1 1 "S" "SIP+D2T" "" _sip._tcp'.split(' ')
+        zcontents = '@ 3200 IN NAPTR 1 1 "S" "SIP+D2T" "" _sip._tcp'.split(' ')
         zp.naptr_from_array(zcontents)
         self.assertEqual(zp.zone.contents['NAPTR'], [{'alias': '@', 
                                                       'order': '1',
@@ -109,7 +109,7 @@ class TestZoneParser(unittest.TestCase):
 
     def test_srv_from_array(self):
         zp = ZoneParser('example.com')
-        zcontents = '_sip._udp IN SRV 0 0 5060 bono-0'.split(' ')
+        zcontents = '_sip._udp 3200 IN SRV 0 0 5060 bono-0'.split(' ')
         zp.srv_from_array(zcontents)
         self.assertEqual(zp.zone.contents['SRV'], [{'alias': '_sip._udp',
                                                     'priority': '0',
