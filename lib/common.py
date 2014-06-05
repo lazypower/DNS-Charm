@@ -39,6 +39,10 @@ def pip_install(path):
         subprocess.call(['pip', 'install', pkg])
 
 
+def resolve_hostname_to_ip(hostname):
+    return subprocess.check_output(['dig', '+short', hostname.strip()])
+
+
 # Parse existing nameservers from resolv.conf
 def existing_nameservers():
     dns_servers = []
