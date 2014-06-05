@@ -17,7 +17,10 @@ from charmhelpers.fetch import (
     apt_update,
 )
 from common import install_packages, pip_install
-from zoneparser import ZoneParser
+try:
+    from zoneparser import ZoneParser
+except:
+    print("Notice: Failed to import zoneparser, probably installing...")
 
 
 class BindProvider(object):
