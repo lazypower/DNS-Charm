@@ -117,6 +117,13 @@ class TestZoneParser(unittest.TestCase):
                                                     'port': '5060',
                                                     'target': 'bono-0'}])
 
+    def test_bono_a_from_array(self):
+        zp = ZoneParser('offline.cw-ngv.com')
+        zp.a_from_array(u'@ 300 IN A 54.73.45.41'.split(' '))
+        self.assertEqual(zp.zone.contents['A'], [{'ttl': '300',
+                                                  'addr': '54.73.45.41',
+                                                  'alias': '@'}])
+
     @patch('builtins.open' if sys.version_info > (3,) else '__builtin__.open')
     @patch('contrib.bind.zone.Zone.to_file')
     def test_save(self, fwm, mopen):
