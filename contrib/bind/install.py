@@ -31,6 +31,8 @@ class ProviderInstaller(object):
         else:
             log("Installing offline debian packages")
             install_packages('files/bind')
+            # rerun cuz its buggy
+            install_packages('files/bind')
             log("Installing Python packages")
             pip_install('files/bind/pip')
 
