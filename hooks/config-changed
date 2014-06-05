@@ -16,7 +16,6 @@ except:
 from charmhelpers.core.hookenv import config
 from common import sanity_check
 from bind.provider import BindProvider
-from bind.install import ProviderInstaller
 
 
 class ConfigChanged(object):
@@ -26,8 +25,6 @@ class ConfigChanged(object):
             return 0
         self.config = config()
         if self.config['provider'] == 'bind':
-            ProviderInstaller()
-            # DIRTY HACK
             bp = BindProvider()
             bp.config_changed(self.config['domain'])
 
