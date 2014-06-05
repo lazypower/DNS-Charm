@@ -13,8 +13,6 @@ The DNS charm implements an abstracted 'provider' concept, to ease integration o
 
 # Usage
 
-Step by step instructions on using the charm:
-
     juju deploy dns
     juju set dns domain='superawesome.com'
     juju add-relation myservice:programmable dns:programmable
