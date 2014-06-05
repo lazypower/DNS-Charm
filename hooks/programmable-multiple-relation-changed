@@ -33,12 +33,17 @@ class ProgrammableChanged(object):
 
     def add_resource(self):
         domain = relation_get('domain')
-        resources = relation_get('resources').split('\n')
+        resources = self.sanitize(relation_get('resources'))
+        if not domain:
+            domain = config()['domain']
 
         if self.config['provider'] == 'bind':
             bp = BindProvider()
             bp.add_record(resources, domain)
 
+    def sanitize(self, data):
+        lines = data.split('\n')
+        return [line for line in lines if line.strip()]
 
 if __name__ == '__main__':
     c = ProgrammableChanged()
