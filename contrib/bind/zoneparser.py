@@ -79,8 +79,8 @@ class ZoneParser(object):
     # from the named-checkzone utility - this is brittle
     # #######################################
 
-    def sanity(self, data):
-            if len(data) < 5:
+    def sanity(self, data, esize=5):
+            if len(data) < esize:
                 raise IndexError("Array Notation should conform to "
                                  "named-checkzone specification")
 
@@ -88,7 +88,7 @@ class ZoneParser(object):
         self.zone.a(data)
 
     def a_from_array(self, data):
-        self.sanity(data)
+        self.sanity(data, 4)
         ttl = data[4].strip().split(' IN')[0]
         addr = data[-1].strip()
         try:
