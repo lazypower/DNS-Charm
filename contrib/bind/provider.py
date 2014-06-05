@@ -9,33 +9,15 @@ try:
 except:
     sys.path.insert(0, os.path.abspath(os.path.join('..', '..', 'lib')))
 
-from charmhelpers.core.hookenv import open_port, unit_get, config, log
+from charmhelpers.core.hookenv import unit_get
 from charmhelpers.core.host import service_reload
 
-from charmhelpers.fetch import (
-    apt_install,
-    apt_update,
-)
-from common import install_packages, pip_install
+
+from common import resolve_hostname_to_ip
 from zoneparser import ZoneParser
 
 
 class BindProvider(object):
-
-    def install(self):
-        if config()['offline'] is False:
-            apt_update(fatal=True)
-            apt_install(packages=[
-                'bind9',
-                'dnsutils',
-                ], fatal=True)
-        else:
-            log("Installing offline debian packages")
-            install_packages('files/bind')
-            log("Installing Python packages")
-            pip_install('files/bind/pip')
-
-        open_port(53)
 
     def config_changed(self, domain='example.com'):
         zp = ZoneParser(domain)
@@ -65,7 +47,8 @@ class BindProvider(object):
 
     def first_setup(self, parser, domain='example.com'):
         # Insert SOA and NS records
-        addr = unit_get('public-address')
+        hostname = unit_get('public-address')
+        addr = resolve_hostname_to_ip(hostname)
         parser.dict_to_zone({'rr': 'SOA',
                              'addr': 'ns.%s.' % domain,
                              'owner': 'root.%s.' % domain,
