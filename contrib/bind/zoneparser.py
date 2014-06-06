@@ -104,7 +104,10 @@ class ZoneParser(object):
         ttl = data[1].strip().split(' IN')[0]
         addr = data[-1].strip()
         try:
-            alias = str(self.tldxtr(data[0].strip()).subdomain)
+            if len(data[0].split('.')) > 1:
+                alias = str(self.tldxtr(data[0].strip()).subdomain)
+            else:
+                alias = data[0]
         except:
             alias = "@"
         if alias == "":

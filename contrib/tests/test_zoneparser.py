@@ -99,7 +99,7 @@ class TestZoneParser(unittest.TestCase):
         zp = ZoneParser('example.com')
         zcontents = '@ 3200 IN NAPTR 1 1 "S" "SIP+D2T" "" _sip._tcp'.split(' ')
         zp.naptr_from_array(zcontents)
-        self.assertEqual(zp.zone.contents['NAPTR'], [{'alias': '@', 
+        self.assertEqual(zp.zone.contents['NAPTR'], [{'alias': '@',
                                                       'order': '1',
                                                       'pref': '1',
                                                       'flag': '"S"',
@@ -123,6 +123,13 @@ class TestZoneParser(unittest.TestCase):
         self.assertEqual(zp.zone.contents['A'], [{'ttl': '300',
                                                   'addr': '54.73.45.41',
                                                   'alias': '@'}])
+
+    def test_ellis_a_from_array(self):
+        zp = ZoneParser('offline.cw-ngv.com')
+        zp.a_from_array(u'ellis-0 300 IN A 54.73.45.41'.split(' '))
+        self.assertEqual(zp.zone.contents['A'], [{'ttl': '300',
+                                                  'addr': '54.73.45.41',
+                                                  'alias': 'ellis-0'}])       
 
     @patch('builtins.open' if sys.version_info > (3,) else '__builtin__.open')
     @patch('contrib.bind.zone.Zone.to_file')
