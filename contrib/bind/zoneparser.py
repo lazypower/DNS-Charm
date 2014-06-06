@@ -12,7 +12,11 @@ try:
 except:
     sys.path.insert(0, os.path.abspath(os.path.join('..', 'lib')))
 
-from common import trim_empty_array_elements as trim
+from common import (
+    return_sub as sub,
+    trim_empty_array_elements as trim,
+)
+
 
 
 # Note about how this is constructed. BIND ships with a tool called
@@ -34,7 +38,6 @@ class ZoneParser(object):
         self.domain = domain
         self.zonefile = "/etc/bind/db.%s" % self.domain
         self.implemented_records = self.zone.contents.keys()
-        self.tldxtr = tldextract.extract
         if self.has_zone():
             self.load_and_parse('/etc/bind/db.%s' % self.domain)
 
@@ -99,12 +102,11 @@ class ZoneParser(object):
     def a_from_array(self, data):
         self.sanity(data, 4)
         data = trim(data)
-        print(data)
         ttl = data[1].strip().split(' IN')[0]
         addr = data[-1].strip()
         try:
             if len(data[0].split('.')) > 1:
-                alias = str(self.tldxtr(data[0].strip()).subdomain)
+                alias = sub(self.domain, data[0])
             else:
                 alias = data[0]
         except:
@@ -120,7 +122,7 @@ class ZoneParser(object):
     def cname_from_array(self, data):
         self.sanity(data)
 
-        alias = self.tldxtr(data[0]).subdomain
+        alias = sub(self.domain, data[0])
         ttl = data[1]
         addr = data[4].strip()
         parsed = {'ttl': ttl, 'addr': addr, 'alias': alias}

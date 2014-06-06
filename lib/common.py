@@ -1,15 +1,5 @@
 import os
-import sys
 import subprocess
-
-# Add charmhelpers to the system path.
-try:
-    sys.path.insert(0, os.path.abspath(os.path.join(os.environ['CHARM_DIR'],
-                                                    'lib')))
-except:
-    sys.path.insert(0, os.path.abspath(os.path.join('..', 'lib')))
-
-
 from charmhelpers.core.hookenv import (
     log,
     config,
@@ -45,8 +35,12 @@ def pip_install(path):
         subprocess.call(['pip', 'install', pkg])
 
 
+def return_sub(domain, address):
+    address = address.rstrip('.')
+    return address[:-len(domain)].rstrip('.')
+
 def resolve_hostname_to_ip(hostname):
-    return subprocess.check_output(['dig', '+short', hostname.strip()])
+    return subprocess.check_output(['dig', '+short', hostname.strip()]).strip()
 
 
 # Parse existing nameservers from resolv.conf

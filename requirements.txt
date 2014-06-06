@@ -3,4 +3,3 @@ flake8
 mock
 coverage
 jinja2
-tldextract
