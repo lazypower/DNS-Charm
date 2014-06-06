@@ -133,6 +133,9 @@ class ZoneParser(object):
         ttl = data[1]
         addr = data[4]
         alias = data[0]
+        if not alias:
+            alias = "@"
+
         parsed = {'ttl': ttl, 'alias': alias, 'addr': addr}
         self.zone.ns(parsed)
 
