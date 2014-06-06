@@ -2,7 +2,7 @@
 
 ### Purpose:
 
-Provider's are essentially service wrappers that expose a common interface to interacting with them. DNS as a spec has a simple and straight forward purpose: to add, remove, or update a pointer/informational record against a given domain. We can achieve communication with any provider through this simple exposed set of methods and consume new services as they emerge.
+Provider's are essentially service wrappers that expose a common interface to interacting with them. [The DNS Charm spec](docs/spec-document.pdf) has a simple and straight forward purpose: to add, remove, or update a pointer/informational record against a given domain. We can achieve communication with any provider through this simple exposed set of methods and consume new services as they emerge.
 
 ## Requirements for upstream inclusion:
 
