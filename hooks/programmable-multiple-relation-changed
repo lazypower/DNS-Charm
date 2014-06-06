@@ -23,6 +23,7 @@ from charmhelpers.core.hookenv import (
 )
 
 from common import trim_empty_array_elements as trim
+from common import resolve_hostname_to_ip as getip
 
 
 class ProgrammableChanged(object):
@@ -30,7 +31,8 @@ class ProgrammableChanged(object):
     def __init__(self):
         self.config = config()
         relid = relation_id()
-        relation_set(relid, {'public-address': unit_get('public-address')})
+        relation_set(relid, {'public-address':
+                     getip(unit_get('public-address'))})
         self.add_resource()
 
     def add_resource(self):
