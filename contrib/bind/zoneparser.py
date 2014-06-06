@@ -4,7 +4,6 @@ import random
 import subprocess
 import string
 import sys
-import tldextract
 from .zone import Zone
 
 try:
