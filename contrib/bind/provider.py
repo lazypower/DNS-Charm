@@ -55,13 +55,9 @@ class BindProvider(object):
                              'expiry': '3w',
                              'minimum': '3h'})
         parser.dict_to_zone({'rr': 'NS', 'alias': '@',
-                             'addr': 'ns1.%s.' % domain})
-        parser.dict_to_zone({'rr': 'A', 'alias': '@', 'addr': addr,
+                             'addr': 'ns.%s.' % domain})
+        parser.dict_to_zone({'rr': 'A', 'alias': 'ns', 'addr': addr,
                              'ttl': 300})
-        parser.dict_to_zone({'rr': 'A', 'alias': 'ns1', 'addr': addr,
-                             'ttl': 300})
-        parser.dict_to_zone({'rr': 'CNAME', 'alias': 'ns',
-                             'addr': 'ns1.example.com.', 'ttl': 300})
 
     def reload_config(self):
         service_reload('bind9')
