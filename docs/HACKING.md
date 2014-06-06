@@ -30,10 +30,12 @@ There are several targets in the makefile to assist in assuring your submission 
 
 Providers are to be implemented in the contrib/ directory under their own nested diretory structure. The only mandated file here is the provider.py file. It is a wrapping class for exposing the underlying service. EG: if you were to extend the charm and add bobs DNS service, you would place it in `contrib/bobs` and touch a provider.py that implemented the following methods:
 
-- install
 - add_record
 - remove_record
 - config_changed
+
+and add a `contrib/bobs/install.py` file with the installation routine. This should be self-calling so invoking an object will run the installation routine.
+
 
 These are the only mandated method calls to fit within the plugin architecture. Ideally we would like these to be python, but if you have an interesting use case that is non-python, and can be embedded as is, submit a pull request!
 

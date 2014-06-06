@@ -27,12 +27,13 @@ In the given examples, we will assume there is a DNS provider named *GoCheap* wi
 ### Create the Directory Structure
 
     mkdir contrib/gocheap
+    touch contrib/gocheap/install.py
     touch contrib/gocheap/provider.py
     touch contrib/gocheap/requirements.txt    
     touch contrib/tests/gocheap_test.py
 
 ### Setup Dependencies
-Add any requirements required for installation into **provider/requirements.txt**. 
+Add any PIP requirements required for installation into **provider/requirements.txt**. 
 
 In our case, requirements.txt will look like the following:
 
@@ -48,9 +49,6 @@ An example skeleton provider.py file:
 
     class Provider(object):
     
-        def Install(self):
-            pass
-        
         def ConfigChanged(self):
             pass
             
