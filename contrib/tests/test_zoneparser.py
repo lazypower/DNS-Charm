@@ -28,13 +28,6 @@ class TestZoneParser(unittest.TestCase):
         self.assertIn('NAPTR', zp.implemented_records)
         self.assertIn('SRV', zp.implemented_records)
 
-    # @patch('builtins.open' if sys.version_info > (3,) else '__builtin__.open')
-    # def test_from_file(self, mopen):
-    #     mopen.return_value.__enter__ = lambda s: s
-    #     mopen.return_value.__exit__ = Mock()
-    #     mopen.return_value.readlines.return_value = self.ez
-    #     zp = ZoneParser('orangebox.com')
-    #     mopen.assert_called_with('/etc/bind/db.orangebox.com')
 
     @patch('builtins.open' if sys.version_info > (3,) else '__builtin__.open')
     def test_from_file_exception(self, mopen):
@@ -56,6 +49,35 @@ class TestZoneParser(unittest.TestCase):
         soam.assert_called_with(self.ez[5].split())
         nsm.assert_called_with(self.ez[6].split())
         am.assert_called_with(self.ez[7].split())
+
+    def test_array_to_zone_with_data(self):
+        data = """sprout 300 IN A 10.0.5.1
+sprout 300 IN NAPTR 1 1 "S" "SIP+D2T" "" _sip._tcp.sprout
+_sip._tcp.sprout 300 IN SRV 0 0 5054 sprout-0
+sprout-0 300 IN A 10.0.5.1""".split('\n')
+        zp = ZoneParser('orangebox.com')
+        zp.array_to_zone(data)
+        cont = zp.zone.contents
+        self.assertEqual(cont['A'], [{'alias': 'sprout',
+                                      'addr': '10.0.5.1',
+                                      'ttl': '300'},
+                                     {'alias': 'sprout-0',
+                                      'addr': '10.0.5.1',
+                                      'ttl': '300'}])
+        self.assertEqual(cont['NAPTR'], [{'alias': 'sprout',
+                                          'order': '1',
+                                          'pref': '1',
+                                          'params': '"SIP+D2T"',
+                                          'regexp': '""',
+                                          'flag': '"S"',
+                                          'replace': '_sip._tcp.sprout',
+                                          'ttl': '300'}])
+        self.assertEqual(cont['SRV'], [{'alias': '_sip._tcp.sprout',
+                                        'port': '5054',
+                                        'ttl': '300',
+                                        'priority': '0',
+                                        'target': 'sprout-0',
+                                        'weight': '0'}])
 
     def test_soa_from_array(self):
         zp = ZoneParser('orangebox.com')
@@ -111,6 +133,7 @@ class TestZoneParser(unittest.TestCase):
                                                       'flag': '"S"',
                                                       'params': '"SIP+D2T"',
                                                       'regexp': '""',
+                                                      'ttl': '3200',
                                                       'replace': '_sip._tcp'}])
 
     def test_srv_from_array(self):
@@ -121,7 +144,8 @@ class TestZoneParser(unittest.TestCase):
                                                     'priority': '0',
                                                     'weight': '0',
                                                     'port': '5060',
-                                                    'target': 'bono-0'}])
+                                                    'target': 'bono-0',
+                                                    'ttl': '3200'}])
 
     def test_bono_a_from_array(self):
         zp = ZoneParser('offline.cw-ngv.com')
@@ -137,25 +161,17 @@ class TestZoneParser(unittest.TestCase):
                                                   'addr': '54.73.45.41',
                                                   'alias': 'ellis-0'}])
 
-    @patch('builtins.open' if sys.version_info > (3,) else '__builtin__.open')
     @patch('contrib.bind.zone.Zone.to_file')
-    def test_save(self, fwm, mopen):
-        mopen.return_value.__enter__ = lambda s: s
-        mopen.return_value.__exit__ = Mock()
-        mopen.return_value.readlines.return_value = """
-zone "localhost" {
-        type master;
-        file "/etc/bind/db.local";
-};
-
-zone "127.in-addr.arpa" {
-        type master;
-        file "/etc/bind/db.127";
-};""".split('\n')
-
+    @patch('os.remove')
+    def test_save(self, osrm, fwm):
         zp = ZoneParser('example.com')
+        zp.passes_validation = Mock()
+        zp.passes_validation.return_value = True
+        zp.add_to_local_zones = Mock()
         zp.save()
+        osrm.assert_called_with('/etc/bind/db.example.com.proposed')
         fwm.assert_called_with('/etc/bind/db.example.com')
+        zp.add_to_local_zones.assert_called_once()
 
     def test_find_type(self):
         zp = ZoneParser('example.com')

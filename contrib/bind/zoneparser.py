@@ -16,16 +16,6 @@ from common import (
     trim_empty_array_elements as trim,
 )
 
-
-# Note about how this is constructed. BIND ships with a tool called
-# named-checkzone. This normalizes ALL output from a bind file, and
-# allows this class to make some assumptions about placement of values.
-# Anything loaded from file here will be passed through this utility.
-# If it fails to noujrmalize/parse the file, then the operation will fail.
-
-# I'm open to suggestions on how to do this outside of relying on bind's
-# wrapping normalizer
-
 logging.basicConfig(level=logging.INFO)
 
 
@@ -55,7 +45,17 @@ class ZoneParser(object):
         return contents
 
     def save(self):
-        self.zone.to_file(self.zonefile)
+        proposed = "{zone}.proposed".format(zone=self.zonefile)
+        # write the output to a proposed file
+        self.zone.to_file(proposed)
+        # perform sanity check on proposed zone
+        if self.passes_validation(proposed):
+            logging.info('Zone additions accepted. writing to ZoneFile')
+            self.zone.to_file(self.zonefile)
+            os.remove(proposed)
+        else:
+            raise Exception('Check failing dirty zone file %s' % proposed)
+
         # Call the default zone file addition
         self.add_to_local_zones()
 
@@ -71,11 +71,16 @@ class ZoneParser(object):
             with open('/etc/bind/zone-backup/%s' % zf, 'w') as outf:
                 outf.write(of)
 
-    def passes_validation(self):
+    def passes_validation(self, zf=None):
+        # Must be first setup - slime the return value.
         if not self.has_zone():
-            raise IOError("Zone file not found %s" % self.zonefile)
+            return True
 
-        ret = subprocess.call(['named-checkzone', self.domain, self.zonefile])
+        if not zf:
+            zf = self.zonefile
+
+        ret = subprocess.call(['named-checkzone', self.domain, zf])
+        logging.info('RET Code: %s' % ret)
         if not ret == 0:
             return False
         return True
@@ -141,11 +146,10 @@ class ZoneParser(object):
         self.sanity(data, 4)
         alias = sub(self.domain, data[0])
         # CNAME's can have TTLS or use the global
-        if len(data) > 4:
-            ttl = data[2]
-            addr = data[4].strip()
-        else:
-            addr = data[3].strip()
+        if self.is_number(data[1]):
+            ttl = data[1]
+        addr = data[-1].strip()
+
         try:
             parsed = {'ttl': ttl, 'addr': addr, 'alias': alias}
         except:
@@ -160,7 +164,7 @@ class ZoneParser(object):
         self.sanity(data, 4)
 
         alias = data[0]
-        addr = data[-1]
+        addr = data[-1].strip()
         if self.is_number(data[1]):
             ttl = data[1]
 
@@ -173,25 +177,39 @@ class ZoneParser(object):
     def naptr_from_array(self, data):
         self.sanity(data)
         alias = data[0]
-        order = data[4]
-        pref = data[5]
-        flag = data[6]
-        params = data[7]
-        regexp = data[8]
-        replace = data[9]
-        parsed = {'alias': alias, 'order': order, 'pref': pref, 'flag': flag,
-                  'params': params, 'regexp': regexp, 'replace': replace}
+        if self.is_number(data[1]):
+            ttl = data[1]
+        order = data[-6]
+        pref = data[-5]
+        flag = data[-4]
+        params = data[-3]
+        regexp = data[-2]
+        replace = data[-1].strip()
+        try:
+            parsed = {'alias': alias, 'order': order, 'pref': pref,
+                      'flag': flag, 'params': params, 'regexp': regexp,
+                      'replace': replace, 'ttl': ttl}
+        except:
+            parsed = {'alias': alias, 'order': order, 'pref': pref,
+                      'flag': flag, 'params': params, 'regexp': regexp,
+                      'replace': replace}
         self.zone.naptr(parsed)
 
     def srv_from_array(self, data):
         self.sanity(data)
         alias = data[0]
-        priority = data[4]
-        weight = data[5]
-        port = data[6]
-        target = data[7]
-        parsed = {'alias': alias, 'priority': priority, 'weight': weight,
-                  'port': port, 'target': target}
+        if self.is_number(data[1]):
+            ttl = data[1]
+        priority = data[-4]
+        weight = data[-3]
+        port = data[-2]
+        target = data[-1].strip()
+        try:
+            parsed = {'alias': alias, 'priority': priority, 'weight': weight,
+                      'port': port, 'target': target, 'ttl': ttl}
+        except:
+            parsed = {'alias': alias, 'priority': priority, 'weight': weight,
+                      'port': port, 'target': target}
         self.zone.srv(parsed)
 
     def update_soa(self, data):
@@ -227,6 +245,9 @@ class ZoneParser(object):
     def array_to_zone(self, blob=None):
         if not blob:
             blob = self.contents
+
+        blob = trim(blob)
+
         methods = {'A': self.a_from_array,
                    'CNAME': self.cname_from_array,
                    'NS': self.ns_from_array,
