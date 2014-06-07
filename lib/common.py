@@ -39,8 +39,12 @@ def return_sub(domain, address):
     address = address.rstrip('.')
     return address[:-len(domain)].rstrip('.')
 
+
 def resolve_hostname_to_ip(hostname):
-    return subprocess.check_output(['dig', '+short', hostname.strip()]).strip()
+    hostname = hostname.strip()
+    out = subprocess.check_output(['dig', '+short', hostname]).rstrip('\n')
+    # required to obtain the IP from MAAS output. See test_common - line 83
+    return out.split('\n')[-1]
 
 
 # Parse existing nameservers from resolv.conf

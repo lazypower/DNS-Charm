@@ -55,3 +55,36 @@ class TestCommon(unittest.TestCase):
         osldm.return_value = ['foo.tar.gz']
         common.pip_install('/tmp/nope')
         spcm.assert_called_with(['pip', 'install', '/tmp/nope/foo.tar.gz'])
+
+    def test_return_sub(self):
+        sub = common.return_sub('example.com', 'foo.example.com')
+        self.assertEqual('foo', sub)
+
+    def test_return_sub_with_sub_domain(self):
+        sub = common.return_sub('offline.example.com',
+                                'foo.offline.example.com')
+        self.assertEqual('foo', sub)
+
+    def test_return_sub_will_return_empty(self):
+        sub = common.return_sub('example.com',
+                                'example.com')
+        self.assertEqual('', sub)
+
+    def test_return_sub_return_with_named_checkzone_output(self):
+        sub = common.return_sub('example.com', 'example.com.')
+        self.assertEqual('', sub)
+
+    def test_hostname_resolution(self):
+        ip = common.resolve_hostname_to_ip('localhost')
+        self.assertEqual('127.0.0.1', ip)
+
+    @patch('subprocess.check_output')
+    def test_maas_funky_dig_resolution(self, spm):
+        spm.return_value = "'10-0-10-55.maas.\n10.0.10.55"
+        ip = common.resolve_hostname_to_ip('localhost')
+        self.assertEqual('10.0.10.55', ip)
+
+    def test_trim(self):
+        a = ['a', '', '', 'b']
+        trimmed = common.trim_empty_array_elements(a)
+        self.assertEqual(['a','b'], trimmed)
