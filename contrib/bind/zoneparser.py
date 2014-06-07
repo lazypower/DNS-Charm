@@ -1,3 +1,4 @@
+import datetime
 import logging
 import os
 import random
@@ -18,12 +19,11 @@ from common import (
 )
 
 
-
 # Note about how this is constructed. BIND ships with a tool called
 # named-checkzone. This normalizes ALL output from a bind file, and
 # allows this class to make some assumptions about placement of values.
 # Anything loaded from file here will be passed through this utility.
-# If it fails to normalize/parse the file, then the operation will fail.
+# If it fails to noujrmalize/parse the file, then the operation will fail.
 
 # I'm open to suggestions on how to do this outside of relying on bind's
 # wrapping normalizer
@@ -47,43 +47,57 @@ class ZoneParser(object):
 
     def from_file(self):
         contents = []
-        normalized_file = self.normalize_contents()
-        try:
-            with open(normalized_file) as f:
+        if self.has_zone():
+            self.backup()
+            with open(self.zonefile, 'r') as f:
                 for line in f.readlines():
-                    contents.append(line)
-        except:
-            logging.info('Unable to open file %s as normalized: %s' %
-                        (self.zonefile, normalized_file))
+                    # ignore comments
+                    if not line.begins_with(';'):
+                        contents.append(line)
         return contents
 
     def save(self):
         self.zone.to_file(self.zonefile)
         # Call the default zone file addition
-        self.add_to_default_zones()
+        self.add_to_local_zones()
 
     # ####################################
     # Utility Methods
     # ####################################
 
-    # Create an intermediate file to warehouse the normalized config
-    def normalize_contents(self):
-        if os.path.exists(self.zonefile):
-            rando = self.id_generator(8)
-            rando_filepath = "/tmp/%s" % rando
-            subprocess.call(['named-checkzone', '-o', rando_filepath,
-                             self.domain, self.zonefile])
-            logging.info('created temporary file %s' % rando_filepath)
-            return rando_filepath
+    def backup(self, fmt='%Y-%m-%d-%H-%M-%S_{zone}'):
+        if self.has_zone():
+            zf = self.zonefile
+            with open(zf) as f:
+                of = f.read()
+            tsf = datetime.datetime.now().strftime(fmt).format(zone=zf)
+            with open(tsf, 'w') as outf:
+                outf.write(of)
+
+    def passes_validation(self):
+        if not self.has_zone():
+            raise IOError("Zone file not found %s" % self.zonefile)
+
+        ret = subprocess.call(['named-checkzone', self.domain, self.zonefile])
+        if not ret == 0:
+            return False
+        return True
 
     def has_zone(self):
         if os.path.exists('/etc/bind/db.%s' % self.domain):
             return True
         return False
 
-    def id_generator(self, size=6):
-        chars = string.ascii_uppercase + string.digits
-        return ''.join(random.choice(chars) for _ in range(size))
+    def is_number(self, s):
+        try:
+            float(s)
+            return True
+        except ValueError:
+            return False
+
+    # def id_generator(self, size=6):
+    #     chars = string.ascii_uppercase + string.digits
+    #     return ''.join(random.choice(chars) for _ in range(size))
 
     # #######################################
     # Parsing Array to Zone Dictionary - this is going
@@ -100,32 +114,43 @@ class ZoneParser(object):
         self.zone.a(data)
 
     def a_from_array(self, data):
-        self.sanity(data, 4)
         data = trim(data)
-        ttl = data[1].strip().split(' IN')[0]
+        self.sanity(data, 4)
         addr = data[-1].strip()
+
+        # If position 1 is numeric, its a TTL
+        if self.is_number(data[1]):
+            ttl = data[1]
+
+        if len(data[0].split('.')) > 1:
+            alias = sub(self.domain, data[0])
+        else:
+            alias = data[0]
+
         try:
-            if len(data[0].split('.')) > 1:
-                alias = sub(self.domain, data[0])
-            else:
-                alias = data[0]
+            parsed = {'ttl': ttl, 'addr': addr, 'alias': alias}
         except:
-            alias = "@"
-        if alias == "":
-            alias = "@"
-        parsed = {'ttl': ttl, 'addr': addr, 'alias': alias}
+            parsed = {'addr': addr, 'alias': alias}
         self.zone.a(parsed)
 
     def update_cname(self, data):
         self.zone.cname(data)
 
     def cname_from_array(self, data):
-        self.sanity(data)
-
+        logging.info("CNAME data: %s" % data)
+        self.sanity(data, 4)
         alias = sub(self.domain, data[0])
-        ttl = data[1]
-        addr = data[4].strip()
-        parsed = {'ttl': ttl, 'addr': addr, 'alias': alias}
+        # CNAME's can have TTLS or use the global
+        if len(data) > 4:
+            ttl = data[2]
+            addr = data[4].strip()
+        else:
+            addr = data[3].strip()
+        try:
+            parsed = {'ttl': ttl, 'addr': addr, 'alias': alias}
+        except:
+            parsed = {'addr': addr, 'alias': alias}
+
         self.zone.cname(parsed)
 
     def update_ns(self, data):
@@ -170,16 +195,13 @@ class ZoneParser(object):
     def update_soa(self, data):
         self.zone.soa(data)
 
+    # see tests/fixtures/db.orangebox.com for expected format.
+    # As this is handled by the Jinja template, it shouldn't change much.
     def soa_from_array(self, data):
         self.sanity(data)
-
-        logging.info("data: %s" % data)
-        # root 0
-        ttl = data[1]
-        # ttl 2
-        # rr 3
-        addr = data[4]
-        owner = data[5]
+        logging.info("SOA data: %s" % data)
+        addr = data[3]
+        owner = data[4]
         serial = data[6]
         refresh = data[7]
 
@@ -195,7 +217,7 @@ class ZoneParser(object):
             minimum = data[10]
         except:
             minimum = None
-        parsed = {'ttl': ttl, 'addr': addr, 'owner': owner, 'serial': serial,
+        parsed = {'addr': addr, 'owner': owner, 'serial': serial,
                   'refresh': refresh, 'update-retry': update_retry,
                   'expiry': expiry, 'minimum': minimum}
         self.zone.soa(parsed)
@@ -266,9 +288,9 @@ class ZoneParser(object):
     # Default Zone Config File Maintenance
     # #######
 
-    def add_to_default_zones(self):
-        zones = self.read_default_zones()
-        if self.exists_in_default_zones(zones) != -1:
+    def add_to_local_zones(self):
+        zones = self.read_local_zones()
+        if self.exists_in_local_zones(zones) != -1:
             logging.info("Zone found, returning")
             return
         addition = ['zone "%s" {' % self.domain,
@@ -276,23 +298,23 @@ class ZoneParser(object):
                     '    file "%s";' % self.zonefile,
                     "};"
                     ""]
-        self.write_default_zones(addition)
+        self.write_local_zones(addition)
         # Tell bind to refresh zone configuration
 
-    def exists_in_default_zones(self, zones):
+    def exists_in_local_zones(self, zones):
         logging.info("Searching for %s" % self.domain)
         for idx, val in enumerate(zones):
             if self.domain in val:
                 return idx
         return -1
 
-    def read_default_zones(self):
-        with open('/etc/bind/named.conf.default-zones') as f:
+    def read_local_zones(self):
+        with open('/etc/bind/named.conf.local-zones') as f:
             default_zones = f.readlines()
         return default_zones
 
-    def write_default_zones(self, config):
-        with open('/etc/bind/named.conf.default-zones', 'a') as f:
+    def write_local_zones(self, config):
+        with open('/etc/bind/named.conf.local-zones', 'a') as f:
             f.write('\n'.join(config))
 
 
