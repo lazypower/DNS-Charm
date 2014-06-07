@@ -20,8 +20,8 @@ class TestBindProvider(unittest.TestCase):
         parser = MagicMock()
         bp.first_setup(parser)
         ugm.assert_called_once()
-        parser.dict_to_zone.assert_called_with({'rr': 'CNAME', 'alias': 'ns',
-                                                'addr': 'ns1.example.com.',
+        parser.dict_to_zone.assert_called_with({'rr': 'A', 'alias': 'ns',
+                                                'addr': '10.0.0.1',
                                                 'ttl': 300})
 
     @patch('contrib.bind.provider.ZoneParser.dict_to_zone')
