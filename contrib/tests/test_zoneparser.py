@@ -83,9 +83,22 @@ class TestZoneParser(unittest.TestCase):
 
     def test_a_from_array_with_ttl(self):
         zp = ZoneParser('orangebox.com')
-        zp.a_from_array(['ns', '300', 'A', '10.0.10.55'])
+        zp.a_from_array(['ns', '300', 'IN', 'A', '10.0.10.55'])
         self.assertEqual(zp.zone.contents['A'], [{'addr': '10.0.10.55',
                                                   'alias': 'ns',
+                                                  'ttl': '300'}])
+
+    def test_ns_from_array(self):
+        zp = ZoneParser('orangebox.com')
+        zp.ns_from_array(['@', 'IN', 'NS', '10.0.10.55'])
+        self.assertEqual(zp.zone.contents['NS'], [{'addr': '10.0.10.55',
+                                                  'alias': '@'}])
+
+    def test_ns_from_array_with_ttl(self):
+        zp = ZoneParser('orangebox.com')
+        zp.ns_from_array(['@', '300', 'IN', 'NS', '10.0.10.55'])
+        self.assertEqual(zp.zone.contents['NS'], [{'addr': '10.0.10.55',
+                                                  'alias': '@',
                                                   'ttl': '300'}])
 
     def test_naptr_from_array(self):
@@ -122,7 +135,7 @@ class TestZoneParser(unittest.TestCase):
         zp.a_from_array(u'ellis-0 300 IN A 54.73.45.41'.split(' '))
         self.assertEqual(zp.zone.contents['A'], [{'ttl': '300',
                                                   'addr': '54.73.45.41',
-                                                  'alias': 'ellis-0'}])       
+                                                  'alias': 'ellis-0'}])
 
     @patch('builtins.open' if sys.version_info > (3,) else '__builtin__.open')
     @patch('contrib.bind.zone.Zone.to_file')
@@ -143,7 +156,6 @@ zone "127.in-addr.arpa" {
         zp = ZoneParser('example.com')
         zp.save()
         fwm.assert_called_with('/etc/bind/db.example.com')
-
 
     def test_find_type(self):
         zp = ZoneParser('example.com')

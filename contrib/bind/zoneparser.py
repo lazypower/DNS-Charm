@@ -92,20 +92,23 @@ class ZoneParser(object):
         except ValueError:
             return False
 
-    # def id_generator(self, size=6):
-    #     chars = string.ascii_uppercase + string.digits
-    #     return ''.join(random.choice(chars) for _ in range(size))
+    # This may get slow
+    def find_type(self, line):
+        for t in self.implemented_records:
+            if t.upper() in line:
+                return line.index(t.upper())
+        return -1
+
+    def sanity(self, data, esize=5):
+        if len(data) < esize:
+            raise IndexError("Array Notation should conform to "
+                             "specification in docs/relations.md")
 
     # #######################################
     # Parsing Array to Zone Dictionary - this is going
     # to be a bit messy, and specific to loading
     # from the named-checkzone utility - this is brittle
     # #######################################
-
-    def sanity(self, data, esize=5):
-            if len(data) < esize:
-                raise IndexError("Array Notation should conform to "
-                                 "specification in docs/relations.md")
 
     def update_a(self, data):
         self.zone.a(data)
@@ -224,64 +227,35 @@ class ZoneParser(object):
     def array_to_zone(self, blob=None):
         if not blob:
             blob = self.contents
+        methods = {'A': self.a_from_array,
+                   'CNAME': self.cname_from_array,
+                   'NS': self.ns_from_array,
+                   'NAPTR': self.naptr_from_array,
+                   'SOA': self.soa_from_array,
+                   'SRV': self.srv_from_array}
+
         logging.info('Processing records from: %s' % blob)
         for entry in blob:
             line = entry.split()
             rrtype = self.find_type(line)
             dclass = line[rrtype].strip()
-            for case in switch(dclass):
-                if case('AAAA'):
-                    self.aaaa_from_array(line)
-                    break
-                if case('CNAME'):
-                    self.cname_from_array(line)
-                    break
-                if case('NS'):
-                    self.ns_from_array(line)
-                    break
-                if case('NAPTR'):
-                    self.naptr_from_array(line)
-                    break
-                if case('SOA'):
-                    self.soa_from_array(line)
-                    break
-                if case('SRV'):
-                    self.srv_from_array(line)
-                    break
-                if case('A'):
-                    self.a_from_array(line)
-                    break
-                if case():
-                    pass
-                    logging.warning('Unable to match type %s' % dclass)
+            try:
+                methods[dclass](line)
+            except:
+                logging.info('Failed to locate method for parsing %s' % dclass)
 
-    # This may get slow
-    def find_type(self, line):
-        for t in self.implemented_records:
-            if t.upper() in line:
-                return line.index(t.upper())
-        return -1
-
-    # Somewhat ambiguous. array_to_zone parses a full array to populate
-    # dict to zone assumes a single record.
+    # Array_to_zone parses a full array to populate dict to zone
+    # assumes a single record.
     def dict_to_zone(self, record):
+        methods = {'A': self.update_a,
+                   'CNAME': self.update_cname,
+                   'SOA': self.update_soa,
+                   'NS': self.update_ns}
         if 'rr' in record.keys():
-            for case in switch(record['rr']):
-                if case('NS'):
-                    self.update_ns(record)
-                    break
-                if case('SOA'):
-                    self.update_soa(record)
-                    break
-                if case('CNAME'):
-                    self.update_cname(record)
-                    break
-                if case('A'):
-                    self.update_a(record)
-                    break
-                if case():
-                    pass
-                    logging.warning('Unable to match type %s' % record['rr'])
+            try:
+                methods[record['rr']](record)
+            except:
+                logging.info('Failed to locate method for %s' % record['rr'])
 
     # #######
     # Default Zone Config File Maintenance
@@ -315,24 +289,3 @@ class ZoneParser(object):
     def write_local_zones(self, config):
         with open('/etc/bind/named.conf.local', 'a') as f:
             f.write('\n'.join(config))
-
-# Python doesn't give us a switch case statement, so replicate it here.
-class switch(object):
-    def __init__(self, value):
-        self.value = value
-        self.fall = False
-
-    def __iter__(self):
-        """Return the match method once, then stop"""
-        yield self.match
-        raise StopIteration
-
-    def match(self, *args):
-        """Indicate whether or not to enter a case suite"""
-        if self.fall or not args:
-            return True
-        elif self.value in args:
-            self.fall = True
-            return True
-        else:
-            return False
