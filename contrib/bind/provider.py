@@ -54,7 +54,7 @@ class BindProvider(object):
                              'update-retry': '15m',
                              'expiry': '3w',
                              'minimum': '3h'})
-        parser.dict_to_zone({'rr': 'NS', 'alias': '@',
+        parser.dict_to_zone({'rr': 'NS', 'alias': '@', 'ttl': 1600,
                              'addr': 'ns.%s.' % domain})
         parser.dict_to_zone({'rr': 'A', 'alias': 'ns', 'addr': addr,
                              'ttl': 300})
