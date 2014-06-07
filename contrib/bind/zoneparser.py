@@ -1,9 +1,7 @@
 import datetime
 import logging
 import os
-import random
 import subprocess
-import string
 import sys
 from .zone import Zone
 
@@ -52,7 +50,7 @@ class ZoneParser(object):
             with open(self.zonefile, 'r') as f:
                 for line in f.readlines():
                     # ignore comments
-                    if not line.begins_with(';'):
+                    if not line.startswith(';') and not line.startswith('$'):
                         contents.append(line)
         return contents
 
@@ -67,11 +65,10 @@ class ZoneParser(object):
 
     def backup(self, fmt='%Y-%m-%d-%H-%M-%S_{zone}'):
         if self.has_zone():
-            zf = self.zonefile
-            with open(zf) as f:
+            with open(self.zonefile) as f:
                 of = f.read()
-            tsf = datetime.datetime.now().strftime(fmt).format(zone=zf)
-            with open(tsf, 'w') as outf:
+            zf = datetime.datetime.now().strftime(fmt).format(zone=self.domain)
+            with open('/etc/bind/zone-backup/%s' % zf, 'w') as outf:
                 outf.write(of)
 
     def passes_validation(self):
@@ -108,7 +105,7 @@ class ZoneParser(object):
     def sanity(self, data, esize=5):
             if len(data) < esize:
                 raise IndexError("Array Notation should conform to "
-                                 "named-checkzone specification")
+                                 "specification in docs/relations.md")
 
     def update_a(self, data):
         self.zone.a(data)
@@ -157,15 +154,17 @@ class ZoneParser(object):
         self.zone.ns(data)
 
     def ns_from_array(self, data):
-        self.sanity(data)
+        self.sanity(data, 4)
 
-        ttl = data[1]
-        addr = data[4]
         alias = data[0]
-        if not alias:
-            alias = "@"
+        addr = data[-1]
+        if self.is_number(data[1]):
+            ttl = data[1]
 
-        parsed = {'ttl': ttl, 'alias': alias, 'addr': addr}
+        try:
+            parsed = {'ttl': ttl, 'alias': alias, 'addr': addr}
+        except:
+            parsed = {'alias': alias, 'addr': addr}
         self.zone.ns(parsed)
 
     def naptr_from_array(self, data):
@@ -225,7 +224,7 @@ class ZoneParser(object):
     def array_to_zone(self, blob=None):
         if not blob:
             blob = self.contents
-
+        logging.info('Processing records from: %s' % blob)
         for entry in blob:
             line = entry.split()
             rrtype = self.find_type(line)
@@ -309,14 +308,13 @@ class ZoneParser(object):
         return -1
 
     def read_local_zones(self):
-        with open('/etc/bind/named.conf.local-zones') as f:
+        with open('/etc/bind/named.conf.local') as f:
             default_zones = f.readlines()
         return default_zones
 
     def write_local_zones(self, config):
-        with open('/etc/bind/named.conf.local-zones', 'a') as f:
+        with open('/etc/bind/named.conf.local', 'a') as f:
             f.write('\n'.join(config))
-
 
 # Python doesn't give us a switch case statement, so replicate it here.
 class switch(object):

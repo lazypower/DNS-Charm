@@ -37,7 +37,10 @@ def pip_install(path):
 
 def return_sub(domain, address):
     address = address.rstrip('.')
-    return address[:-len(domain)].rstrip('.')
+    if domain in address:
+        return address[:-len(domain)].rstrip('.')
+    else:
+        return address
 
 
 def resolve_hostname_to_ip(hostname):

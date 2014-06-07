@@ -4,10 +4,10 @@
 $TTL    604800
 ;@      IN      RR  ADDR 
 {%- for record in data['SOA'] %}
-@	IN 	SOA	{{record['addr']}}	{{record['owner']}} ({{record['serial']}} {{record['refresh']}} {{record['update-retry']}} {{record['expiry']}} {{record['update-retry']}} )
+@	IN 	SOA	{{record['addr']}}	{{record['owner']}} ( {{record['serial']}} {{record['refresh']}} {{record['update-retry']}} {{record['expiry']}} {{record['update-retry']}} )
 {% endfor %}
 {%- for record in data['NS'] %}
-{{record['owner-name']}}	IN     NS	{{record['addr']}}
+{{record['alias']}}	IN     NS	{{record['addr']}}
 {%- endfor %}
 {%- for record in data['A'] %}
 {{record['alias']}}	IN     A	{{record['addr']}}
