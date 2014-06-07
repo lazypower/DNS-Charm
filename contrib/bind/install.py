@@ -36,4 +36,5 @@ class ProviderInstaller(object):
             log("Installing Python packages")
             pip_install('files/bind/pip')
 
+        os.makedirs('/etc/bind/zone-backup')
         open_port(53)
