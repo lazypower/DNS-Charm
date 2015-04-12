@@ -35,6 +35,9 @@ class ProgrammableChanged(object):
 
     def add_resource(self):
         domain = relation_get('domain')
+	# missing relation data - return 0
+	if None == domain or len(domain) == 0:
+	  return
         alias = relation_get('alias')
         addr = relation_get('addr')
         rr = relation_get('rr').upper()
