@@ -37,4 +37,5 @@ class ProviderInstaller(object):
             pip_install('files/bind/pip')
 
         os.makedirs('/etc/bind/zone-backup')
-        open_port(53)
+        open_port(53, "TCP")
+        open_port(53, "UDP")
