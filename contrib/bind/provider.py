@@ -32,7 +32,17 @@ class Provider(object):
 
     def remove_record(self, record, domain='example.com'):
         zp = ZoneParser(domain)
-        zp.zone.remove('alias', record['rr'], record['alias'])
+        if type(record) is dict:
+            zp.zone.remove('alias', record['rr'], record['alias'])
+        elif type(record) is list:
+            for item in record:
+                rcrd = item.split(' ')
+                try:
+                    zp.zone.remove('alias', rcrd[3], rcrd[0])
+                except KeyError as e:
+                    # skip removals if we dont find the data. log it and move on
+                    print "Unable to locate {}".format(rcrd[0])
+
         zp.save()
         self.reload_config()
 

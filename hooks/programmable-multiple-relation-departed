@@ -1,0 +1,45 @@
+#!/usr/bin/python
+import os
+import sys
+
+sys.path.insert(0, os.path.abspath(os.path.join(os.environ['CHARM_DIR'],
+                                                    'contrib')))
+
+#from bind.provider import BindProvider
+
+from charmhelpers.core.hookenv import (
+    log,
+    config,
+    unit_get,
+    relation_get,
+)
+
+from common import trim_empty_array_elements as trim
+from common import load_class
+
+class ProgrammableDeparted(object):
+
+    def __init__(self):
+        self.config = config()
+        self.remove_record()
+
+
+    def remove_record(self):
+        if not relation_get('resources'):
+            log('No resources sent on the wire, unable to update DNS.',
+                    level='CRITICAL')
+            log('Manual cleanup of records will be required!',
+                    level='CRITICAL')
+            return
+
+        resources = trim(relation_get('resources').split('\n'))
+
+        domain = config()['domain']
+
+        class_string = "{}.provider.Provider".format(self.config['provider'])
+        provider = load_class(class_string)
+        p = provider()
+        p.remove_record(resources, domain)
+
+if __name__ == '__main__':
+    c = ProgrammableDeparted()
