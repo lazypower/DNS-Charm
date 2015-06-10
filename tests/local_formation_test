@@ -1,0 +1,82 @@
+#!/usr/bin/env python3
+
+import amulet
+import os
+import shlex
+from subprocess import check_output
+import unittest
+import yaml
+
+class TestDeployment(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.deployment = amulet.Deployment(series='trusty')
+
+        with open(os.path.join(os.path.dirname(__file__), 'local-bundle.yaml')) as f:
+            bundle = yaml.safe_load(f.read())
+
+        cls.deployment.load(bundle)
+
+        try:
+            cls.deployment.setup(timeout=900)
+            cls.deployment.sentry.wait()
+        except amulet.helpers.TimeoutError:
+            amulet.raise_status(amulet.SKIP, msg="Environment wasn't stood up in time")
+        except:
+            raise
+        cls.dns_unit = cls.deployment.sentry['dns/0']
+
+
+
+    def test_zone_existence(self):
+        stat = self.dns_unit.file_stat('/etc/bind/db.example.com')
+        self.assertTrue(stat['size'] > 0)
+
+
+    def test_programmable_multiple_works(self):
+        contents = self.dns_unit.file_contents('/etc/bind/db.example.com')
+        self.assertTrue('sprout' in contents)
+
+
+    def test_programmable_works(self):
+        contents = self.dns_unit.file_contents('/etc/bind/db.example.com')
+        self.assertTrue('dtest' in contents)
+
+    def test_resolution_with_programmable(self):
+        dns_server = self.dns_unit.info['public-address']
+        test = self.dns_unit.run('unit-get private-address')[0]
+        cmd = "dig @{} dtest.example.com".format(dns_server)
+        out = check_output(shlex.split(cmd))
+        self.assertTrue(test in str(out))
+
+
+
+
+
+
+        # Now you can use self.deployment.sentry.unit[UNIT] to address each of
+        # the units and perform more in-depth steps.  You can also reference
+        # the first unit as self.unit.
+        # There are three test statuses that can be triggered with
+        # amulet.raise_status():
+        #   - amulet.PASS
+        #   - amulet.FAIL
+        #   - amulet.SKIP
+        # Each unit has the following methods:
+        #   - .info - An array of the information of that unit from Juju
+        #   - .file(PATH) - Get the details of a file on that unit
+        #   - .file_contents(PATH) - Get plain text output of PATH file from that unit
+        #   - .directory(PATH) - Get details of directory
+        #   - .directory_contents(PATH) - List files and folders in PATH on that unit
+        #   - .relation(relation, service:rel) - Get relation data from return service
+        #          add tests here to confirm service is up and working properly
+        # For example, to confirm that it has a functioning HTTP server:
+        #     page = requests.get('http://{}'.format(self.unit.info['public-address']))
+        #     page.raise_for_status()
+        # More information on writing Amulet tests can be found at:
+        #     https://juju.ubuntu.com/docs/tools-amulet.html
+        pass
+
+
+if __name__ == '__main__':
+    unittest.main()
