@@ -7,23 +7,21 @@ from mock import (
     Mock,
 )
 
-sys.path.insert(0, os.path.abspath(os.path.join('..', 'lib', 'charmhelpers')))
-sys.path.insert(0, os.path.abspath(os.path.join('..', 'lib')))
-from lib import common
+from contrib import common
 
 
 class TestCommon(unittest.TestCase):
 
-    @patch('lib.common.config')
-    @patch('lib.common.log')
+    @patch('contrib.common.config')
+    @patch('contrib.common.log')
     def test_sanity_check_configured(self, lmock, cfgmock):
         cfgmock.return_value = {'assume_provider': True,
                                 'domain': 'example.com'}
         self.assertTrue(common.sanity_check())
         cfgmock.assert_called_once(common.sanity_check())
 
-    @patch('lib.common.config')
-    @patch('lib.common.log')
+    @patch('contrib.common.config')
+    @patch('contrib.common.log')
     def test_sanity_check_unconfigured(self, lmock, cfgmock):
         cfgmock.return_value = {'assume_provider': True,
                                 'domain': ''}
