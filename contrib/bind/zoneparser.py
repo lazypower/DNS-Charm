@@ -5,7 +5,7 @@ import subprocess
 import sys
 from .zone import Zone
 
-from contrib.common import (
+from common import (
     return_sub as sub,
     trim_empty_array_elements as trim,
 )

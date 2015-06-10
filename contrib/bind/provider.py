@@ -1,12 +1,12 @@
 import os
-import sys
 from random import randint
 from charmhelpers.core.hookenv import unit_get
 from charmhelpers.core.host import service_reload
 
 from zoneparser import ZoneParser
 
-from contrib.common import resolve_hostname_to_ip
+from common import resolve_hostname_to_ip
+
 
 class BindProvider(object):
 
