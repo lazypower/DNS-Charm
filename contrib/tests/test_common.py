@@ -90,3 +90,12 @@ class TestCommon(unittest.TestCase):
         a = ['a', '', '', 'b']
         trimmed = common.trim_empty_array_elements(a)
         self.assertEqual(['a','b'], trimmed)
+
+    @patch('common.config')
+    def test_provider_keys(self, cfgmock):
+        cfgmock.return_value = { 'provider_keys':
+                                 'awsKey|12345 awsSecret|abc123def' }
+        keys = common.provider_keys()
+        self.assertEqual(keys['awsKey'], '12345')
+        self.assertEqual(keys['awsSecret'], 'abc123def')
+
