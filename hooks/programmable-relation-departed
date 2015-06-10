@@ -1,15 +1,11 @@
 #!/usr/bin/python
 import os
 import sys
-# Add charmhelpers to the system path.
-try:
-    sys.path.insert(0, os.path.abspath(os.path.join(os.environ['CHARM_DIR'],
+
+sys.path.insert(0, os.path.abspath(os.path.join(os.environ['CHARM_DIR'],
                                                     'contrib')))
-except:
-    sys.path.insert(0, os.path.abspath(os.path.join('..', 'contrib')))
 
-
-from bind.provider import BindProvider
+#from bind.provider import BindProvider
 
 from charmhelpers.core.hookenv import (
     log,
@@ -17,6 +13,8 @@ from charmhelpers.core.hookenv import (
     unit_get,
     relation_get,
 )
+
+from common import load_class
 
 class ProgrammableBroken(object):
 
@@ -33,11 +31,10 @@ class ProgrammableBroken(object):
 
         parsed = {'domain': domain, 'alias': alias, 'addr': addr, 'rr': rr}
 
-        if self.config['provider'] == 'bind':
-            bp = BindProvider()
-            bp.remove_record(parsed, domain)
-
-
+        class_string = "{}.provider.Provider".format(self.config['provider'])
+        provider = load_class(class_string)
+        p = provider()
+        p.remove_record(parsed, domain)
 
 if __name__ == '__main__':
     c = ProgrammableBroken()

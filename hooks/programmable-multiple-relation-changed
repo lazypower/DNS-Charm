@@ -2,14 +2,8 @@
 import os
 import sys
 # Add charmhelpers to the system path.
-try:
-    sys.path.insert(0, os.path.abspath(os.path.join(os.environ['CHARM_DIR'],
-                                                    'contrib')))
-except:
-    sys.path.insert(0, os.path.abspath(os.path.join('..', 'contrib')))
-
-
-from bind.provider import BindProvider
+sys.path.insert(0, os.path.abspath(os.path.join(os.environ['CHARM_DIR'],
+                'contrib')))
 
 from charmhelpers.core.hookenv import (
     config,
@@ -21,7 +15,7 @@ from charmhelpers.core.hookenv import (
 
 from common import trim_empty_array_elements as trim
 from common import resolve_hostname_to_ip as getip
-
+from common import load_class
 
 class ProgrammableChanged(object):
 
@@ -43,9 +37,10 @@ class ProgrammableChanged(object):
         if not domain:
             domain = config()['domain']
 
-        if self.config['provider'] == 'bind':
-            bp = BindProvider()
-            bp.add_record(resources, domain)
+        class_string = "{}.provider.Provider".format(self.config['provider'])
+        provider = load_class(class_string)
+        p = provider()
+        p.add_record(resources, domain)
 
 
 if __name__ == '__main__':

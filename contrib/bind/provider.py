@@ -8,7 +8,7 @@ from zoneparser import ZoneParser
 from common import resolve_hostname_to_ip
 
 
-class BindProvider(object):
+class Provider(object):
 
     def config_changed(self, domain='example.com'):
         zp = ZoneParser(domain)
