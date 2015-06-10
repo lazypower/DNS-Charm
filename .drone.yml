@@ -1,5 +1,5 @@
 image: bradrydzewski/python:2.7
 script:
-    - apt-get install -y dnsutils
+    - sudo apt-get install -y dnsutils
     - pip install tox
     - make test
