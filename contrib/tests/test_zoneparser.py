@@ -5,8 +5,8 @@ from mock import (
     Mock,
 )
 
-from contrib.bind.zoneparser import ZoneParser
-# from contrib.bind.zone import Zone
+from bind.zoneparser import ZoneParser
+# from bind.zone import Zone
 
 
 class TestZoneParser(unittest.TestCase):
@@ -39,9 +39,9 @@ class TestZoneParser(unittest.TestCase):
         zp.normalize_contents.return_value = self.ez
         self.assertEqual(zp.from_file(), [])
 
-    @patch('contrib.bind.zoneparser.ZoneParser.a_from_array')
-    @patch('contrib.bind.zoneparser.ZoneParser.ns_from_array')
-    @patch('contrib.bind.zoneparser.ZoneParser.soa_from_array')
+    @patch('bind.zoneparser.ZoneParser.a_from_array')
+    @patch('bind.zoneparser.ZoneParser.ns_from_array')
+    @patch('bind.zoneparser.ZoneParser.soa_from_array')
     def test_array_to_zone(self, soam, nsm, am):
         zp = ZoneParser('orangebox.com')
         zp.contents = self.ez
@@ -161,7 +161,7 @@ sprout-0 300 IN A 10.0.5.1""".split('\n')
                                                   'addr': '54.73.45.41',
                                                   'alias': 'ellis-0'}])
 
-    @patch('contrib.bind.zone.Zone.to_file')
+    @patch('bind.zone.Zone.to_file')
     @patch('os.remove')
     def test_save(self, osrm, fwm):
         zp = ZoneParser('example.com')

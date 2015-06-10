@@ -1,18 +1,12 @@
 import os
-import sys
 from random import randint
-
-# Add charmhelpers to the system path.
-try:
-    sys.path.insert(0, os.path.abspath(os.path.join(os.environ['CHARM_DIR'],
-                                                    'lib')))
-except:
-    sys.path.insert(0, os.path.abspath(os.path.join('..', '..', 'lib')))
-
 from charmhelpers.core.hookenv import unit_get
 from charmhelpers.core.host import service_reload
-from common import resolve_hostname_to_ip
+
 from zoneparser import ZoneParser
+
+from common import resolve_hostname_to_ip
+
 
 class BindProvider(object):
 

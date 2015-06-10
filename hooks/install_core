@@ -1,0 +1,60 @@
+#!/usr/bin/python
+import os
+import subprocess
+import sys
+
+
+# TODO: refactor this out - its really messy
+
+# Add charmhelpers to the system path.
+try:
+    sys.path.insert(0, os.path.abspath(os.path.join(os.environ['CHARM_DIR'],
+                                                    'contrib')))
+except:
+    sys.path.insert(0, os.path.abspath(os.path.join('..', 'contrib')))
+
+
+from charmhelpers.core.hookenv import (
+    log,
+    config,
+)
+from charmhelpers.fetch import (
+    apt_install,
+    apt_update,
+)
+
+
+from common import install_packages, sanity_check
+from bind.install import ProviderInstaller
+
+
+class Install(object):
+
+    # Does not assume offline environment by default
+    def install_core(self):
+        if not sanity_check():
+            return 0
+
+        # TODO: Check offline, install fatpack
+        if config()['offline'] is False:
+            apt_update(fatal=True)
+            apt_install(packages=['python-pip'], fatal=True)
+
+            subprocess.call(['pip', 'install', '-r', 'requirements.txt',
+                             '--upgrade'])
+        else:
+            log('Installing Core Packages from Offline Pack')
+            install_packages('files/core')
+
+    # Place the offline environment as a config option
+    # Place the files in data/ and the provider/charm will look to install this
+    # information from there.
+
+    def install_provider(self):
+        if config()['provider'] == 'bind':
+            ProviderInstaller()
+
+if __name__ == '__main__':
+    i = Install()
+    i.install_core()
+    i.install_provider()

@@ -5,12 +5,6 @@ import subprocess
 import sys
 from .zone import Zone
 
-try:
-    sys.path.insert(0, os.path.abspath(os.path.join(os.environ['CHARM_DIR'],
-                                                    'lib')))
-except:
-    sys.path.insert(0, os.path.abspath(os.path.join('..', 'lib')))
-
 from common import (
     return_sub as sub,
     trim_empty_array_elements as trim,

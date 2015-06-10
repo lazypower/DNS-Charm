@@ -1,13 +1,6 @@
 import os
 import sys
 
-# Add charmhelpers to the system path.
-try:
-    sys.path.insert(0, os.path.abspath(os.path.join(os.environ['CHARM_DIR'],
-                                                    'lib')))
-except:
-    sys.path.insert(0, os.path.abspath(os.path.join('..', '..', 'lib')))
-
 from charmhelpers.core.hookenv import open_port, config, log
 
 from charmhelpers.fetch import (
