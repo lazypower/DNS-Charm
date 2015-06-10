@@ -2,7 +2,7 @@ import unittest
 from mock import patch, Mock
 import sys
 
-from contrib.bind.zone import Zone
+from bind.zone import Zone
 
 
 class TestZone(unittest.TestCase):
@@ -132,7 +132,7 @@ class TestZone(unittest.TestCase):
                            'txt': '"Located in a black hole" " somewhere"'}])
 
     @patch('builtins.open' if sys.version_info > (3,) else '__builtin__.open')
-    @patch('contrib.bind.zone.jinja2.Template.render')
+    @patch('bind.zone.jinja2.Template.render')
     def test_to_file(self, tm, mopen):
         mopen.return_value.__enter__ = lambda s: s
         mopen.return_value.__exit__ = Mock()

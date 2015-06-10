@@ -7,21 +7,21 @@ from mock import (
     Mock,
 )
 
-from contrib import common
+import common
 
 
 class TestCommon(unittest.TestCase):
 
-    @patch('contrib.common.config')
-    @patch('contrib.common.log')
+    @patch('common.config')
+    @patch('common.log')
     def test_sanity_check_configured(self, lmock, cfgmock):
         cfgmock.return_value = {'assume_provider': True,
                                 'domain': 'example.com'}
         self.assertTrue(common.sanity_check())
         cfgmock.assert_called_once(common.sanity_check())
 
-    @patch('contrib.common.config')
-    @patch('contrib.common.log')
+    @patch('common.config')
+    @patch('common.log')
     def test_sanity_check_unconfigured(self, lmock, cfgmock):
         cfgmock.return_value = {'assume_provider': True,
                                 'domain': ''}

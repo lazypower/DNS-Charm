@@ -3,17 +3,14 @@ from mock import patch, Mock, MagicMock
 import os
 import sys
 
-from contrib.bind.provider import BindProvider
-
-sys.path.insert(0, os.path.abspath(os.path.join('..', '..',
-                                                'lib', 'charmhelpers')))
+from bind.provider import BindProvider
 
 
 class TestBindProvider(unittest.TestCase):
 
 
     @patch('subprocess.check_output')
-    @patch('contrib.bind.provider.unit_get')
+    @patch('bind.provider.unit_get')
     def test_first_setup(self, ugm, spcom):
         spcom.return_value = '10.0.0.1'
         bp = BindProvider()
@@ -24,8 +21,8 @@ class TestBindProvider(unittest.TestCase):
                                                 'addr': '10.0.0.1',
                                                 'ttl': 300})
 
-    @patch('contrib.bind.provider.ZoneParser.dict_to_zone')
-    @patch('contrib.bind.provider.ZoneParser.save')
+    @patch('bind.provider.ZoneParser.dict_to_zone')
+    @patch('bind.provider.ZoneParser.save')
     def test_add_record(self, zps, zpm):
         bp = BindProvider()
         bp.reload_config = Mock()
@@ -34,7 +31,7 @@ class TestBindProvider(unittest.TestCase):
         zpm.assert_called_once()
         bp.reload_config.assert_called_once()
 
-    @patch('contrib.bind.provider.ZoneParser.save')
+    @patch('bind.provider.ZoneParser.save')
     @patch('os.path.exists')
     def test_config_changed(self, osem, zpsm):
         osem.return_value = False
@@ -46,7 +43,7 @@ class TestBindProvider(unittest.TestCase):
         zpsm.assert_called_once()
         bp.reload_config.assert_called_once()
 
-    @patch('contrib.bind.provider.ZoneParser')
+    @patch('bind.provider.ZoneParser')
     def test_remove_record(self, zpm):
         bp = BindProvider()
         bp.reload_config = Mock()
