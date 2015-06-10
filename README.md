@@ -1,5 +1,7 @@
 # DNS As A Service
 
+[![Build Status](https://drone.io/github.com/chuckbutler/DNS-Charm/status.png)](https://drone.io/github.com/chuckbutler/DNS-Charm/latest)
+
 ## Overview
 
 the DNS charm is unique in that it wraps several other services to provide a common gateway to automatically provisioning your DNS configuration. Regardless if you are setting up a BIND cluster, PowerDNS, or integrating with a third party provider (such as Amazon Rt53, or GoDaddy for example).
