@@ -1,5 +1,0 @@
-nose
-flake8
-mock
-coverage
-jinja2

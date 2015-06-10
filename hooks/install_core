@@ -7,12 +7,8 @@ import sys
 # TODO: refactor this out - its really messy
 
 # Add charmhelpers to the system path.
-try:
-    sys.path.insert(0, os.path.abspath(os.path.join(os.environ['CHARM_DIR'],
-                                                    'contrib')))
-except:
-    sys.path.insert(0, os.path.abspath(os.path.join('..', 'contrib')))
-
+sys.path.insert(0, os.path.abspath(os.path.join(os.environ['CHARM_DIR'],
+                'contrib')))
 
 from charmhelpers.core.hookenv import (
     log,
@@ -40,7 +36,7 @@ class Install(object):
             apt_update(fatal=True)
             apt_install(packages=['python-pip'], fatal=True)
 
-            subprocess.call(['pip', 'install', '-r', 'requirements.txt',
+            subprocess.call(['pip', 'install', '-r', 'contrib/requirements.txt',
                              '--upgrade'])
         else:
             log('Installing Core Packages from Offline Pack')
