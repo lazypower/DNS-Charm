@@ -1,3 +1,4 @@
+import importlib
 import os
 import subprocess
 from charmhelpers.core.hookenv import (
@@ -59,3 +60,13 @@ def existing_nameservers():
             if line.find('nameserver') != -1:
                 dns_servers.append(line.replace('nameserver ', '').rstrip())
     return dns_servers
+
+def load_module(full_class_string):
+    """
+    dynamically load a class from a string
+    """
+
+    class_data = full_class_string.split(".")
+    module_path = ".".join(class_data[:-1])
+
+    return importlib.import_module(module_path)

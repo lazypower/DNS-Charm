@@ -4,8 +4,6 @@ import subprocess
 import sys
 
 
-# TODO: refactor this out - its really messy
-
 # Add charmhelpers to the system path.
 sys.path.insert(0, os.path.abspath(os.path.join(os.environ['CHARM_DIR'],
                 'contrib')))
@@ -20,8 +18,8 @@ from charmhelpers.fetch import (
 )
 
 
-from common import install_packages, sanity_check
-from bind.install import ProviderInstaller
+from common import install_packages, sanity_check, load_module
+# from bind.install import ProviderInstaller
 
 
 class Install(object):
@@ -48,7 +46,8 @@ class Install(object):
 
     def install_provider(self):
         if config()['provider'] == 'bind':
-            ProviderInstaller()
+            provider = load_module("{}.install.install".format(config()['provider']))
+            provider.install()
 
 if __name__ == '__main__':
     i = Install()
