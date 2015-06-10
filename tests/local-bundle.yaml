@@ -4,6 +4,7 @@ dns-testing:
       charm: local:trusty/dtest
     dns:
       charm: local:trusty/dns
+      expose: true
       options:
         domain: example.com
   relations:
