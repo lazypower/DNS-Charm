@@ -1,4 +1,7 @@
 image: bradrydzewski/python:2.7
+env:
+    - AWS_ACCESS_KEY={{AWS_ACCESS_KEY}}
+    - AWS_SECRET_ACCESS_KEY={{AWS_SECRET_ACCESS_KEY}}
 script:
     - sudo apt-get install -y dnsutils
     - pip install tox
