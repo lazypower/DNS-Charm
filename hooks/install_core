@@ -32,7 +32,9 @@ class Install(object):
         # TODO: Check offline, install fatpack
         if config()['offline'] is False:
             apt_update(fatal=True)
-            apt_install(packages=['python-pip'], fatal=True)
+            apt_install(packages=['python-pip',
+                                  'libxml2-dev',
+                                  'libxslt-dev'], fatal=True)
 
             subprocess.call(['pip', 'install', '-r', 'contrib/requirements.txt',
                              '--upgrade'])
