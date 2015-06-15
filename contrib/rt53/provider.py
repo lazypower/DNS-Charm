@@ -13,12 +13,11 @@ class Provider:
             key = pkey['AWS_ACCESS_KEY_ID']
             secret = pkey['AWS_SECRET_ACCESS_KEY']
 
-        self.connection = route53.connection.Route53Connection(
+        self.client = route53.connection.Route53Connection(
                 aws_access_key_id=key,
                 aws_secret_access_key=secret)
         self.domain = domain
-        self.zone = self.connection.get_zone("{}.".format(self.domain))
-
+        self.zone = self.client.get_zone("{}.".format(self.domain))
 
     def config_changed(self):
         if not self.zone.id:
@@ -27,12 +26,13 @@ class Provider:
 
 
     def add_record(self, record):
+        resource = route53.record.ResourceRecordSets(self.client, self.zone.id)
         if type(record) is dict:
            # single record
-           self.parse_record(record)
+           self.parse_record(record, resource)
         if type(record) is list:
             for r in record:
-                self.parse_record(record)
+                self.parse_record(r, resource)
 
 
     def remove_record(self):
@@ -49,46 +49,49 @@ class Provider:
         pass
 
     # Supporting Methods
-    def parse_record(self, entry):
+    def parse_record(self, entry, resource):
          methods = {'A': self.create_a_record,
                    'CNAME': self.create_cname_record,
                    'NS': self.create_ns_record,
-                   'SRV': self.create_srv_record,}
+                   'SRV': self.create_srv_record,
+                   'NAPTR': self.create_naptr_record,}
 
          if 'rr' in entry.keys():
-            methods[entry['rr']](entry)
+            methods[entry['rr']](entry, resource)
          else:
              raise ValueError("Missing record type - see README for accepted"
                               " dns record types")
 
 
 
-    def create_a_record(self, record):
-        """
-        takes params: (str)name, (str)values, (str)ttl
-        """
-        zone = self.connection.get_hozed_zone_by_id(get_zone_id(self.domain))
-        new_record, change_info = zone.create_a_record(name=record['name'],
-                                        values=record['addr'],
-                                        ttl=record['ttl']
-        )
+    def create_a_record(self, record, resource):
+        print record
+        fqdn = "{}.{}".format(record['alias'], self.domain)
+        if "ttl" in record.keys() and record['ttl']:
+            status = resource.add_change("UPSERT", fqdn, "A", ttl=record['ttl'])
+        else:
+            status = resource.add_change("UPSERT", fqdn, "A")
+        status.add_value(record['addr'])
+        resource.commit()
 
-    def create_cname_record(self, record):
-        """
-        takes params: (str)name, (str)values, (str)ttl
-        """
-        pass
+    def create_naptr_record(self, record, resource):
+        print "Rt53  Does not yet support NAPTR resources"
 
-    def create_ns_record(self, record):
-        """
-        takes params: (str)name, (str)values, (str)ttl
-        """
-        pass
+    def create_cname_record(self, record, resource):
+        fqdn = "{}.{}".format(record['alias'], self.domain)
+        if "ttl" in record.keys() and record['ttl']:
+            status = resource.add_change("UPSERT", fqdn, "CNAME", ttl=record['ttl'])
+        else:
+            status = resource.add_change("UPSERT", fqdn, "CNAME")
+        status.add_value(record['addr'])
+        resource.commit()
 
-    def create_srv_record(self, record):
-        """
-        takes params: (str)name, (str)values, (str)ttl
-        """
-        pass
+
+    def create_ns_record(self, record, resource):
+        print "NS Records Not Implemented"
+
+    def create_srv_record(self, record, resource):
+        print "SRV records not implemented"
+
 
 
