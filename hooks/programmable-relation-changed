@@ -28,18 +28,18 @@ class ProgrammableChanged(object):
     def add_resource(self):
         domain = relation_get('domain')
 	# missing relation data - return 0
-	if None == domain or len(domain) == 0:
-	  return
         alias = relation_get('alias')
         addr = relation_get('addr')
         rr = relation_get('rr').upper()
+        if None == domain or len(domain) == 0 or None == addr or len(addr) == 0:
+	  return
 
         parsed = {'domain': domain, 'alias': alias, 'addr': addr, 'rr': rr}
 
         class_string = '{}.provider.Provider'.format(self.config['provider'])
         provider = load_class(class_string)
-        p = provider()
-        p.add_record(parsed, domain)
+        p = provider(domain)
+        p.add_record(parsed)
 
 
 if __name__ == '__main__':
