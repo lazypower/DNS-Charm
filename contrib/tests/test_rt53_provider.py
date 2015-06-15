@@ -30,7 +30,7 @@ class TestRt53Provider():
             this is an integration level test until I figure out what to mock
             in the route53 lib
         """
-        id = self.provider.get_id_by_dns('example.com')
+        id = self.provider.get_zone_id('example.com')
         if not os.getenv('RT53DOMAIN_KEY'):
             assert id == "ZD4S1IEWT6LPB"
         else:
@@ -38,7 +38,7 @@ class TestRt53Provider():
 
 
     def test_config_changed(self):
-        with patch('rt53.provider.Provider.get_id_by_dns') as get:
+        with patch('rt53.provider.Provider.get_zone_id') as get:
             self.provider.config_changed()
             get.assert_called_with('example.com')
 
@@ -63,5 +63,20 @@ class TestRt53Provider():
         assert nmk.not_called()
         assert smk.not_called()
 
+
+    def test_create_a_record(self):
+        record = {'name': 'test', 'ttl': 1600, 'rr': 'A', 'addr': '127.0.0.1'}
+        with patch('route53.hosted_zone.HostedZone.create_a_record') as crm:
+            self.provider.create_a_record(record)
+            crm.assert_called_with('test', '127.0.0.1', 1600)
+
+    def test_create_cname_record(self):
+        pass
+
+    def test_create_ns_record(self):
+        pass
+
+    def test_create_srv_record(self):
+        pass
 
 
