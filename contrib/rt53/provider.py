@@ -1,29 +1,27 @@
 from common import provider_keys
-import route53
+from boto import route53
 
 class Provider:
 
     # Primary Interface Methods
+    ALLOWED_RECORDS = ['A', 'CNAME', 'NS', 'SRV']
+
 
     def __init__(self, domain, key=None, secret=None):
         if not key or not secret:
             pkey = provider_keys()
-            key = pkey['AWS_ACCESS_KEY']
+            key = pkey['AWS_ACCESS_KEY_ID']
             secret = pkey['AWS_SECRET_KEY']
 
-        self.connection = route53.connect(
+        self.connection = route53.connection.Route53Connection(
                 aws_access_key_id=key,
                 aws_secret_access_key=secret)
-        self.record_types = ['A', 'CNAME', 'NS', 'SRV']
         self.domain = domain
-        zone_id = self.get_zone_id(self.domain)
-        self.zone = self.connection.get_hosted_zone_by_id(zone_id)
+        self.zone = self.connection.get_zone("{}.".format(self.domain))
 
 
     def config_changed(self):
-        zone_id = self.get_zone_id(self.domain)
-        if not zone_id:
-            raise ValueError("Missing domain in AWS Rt53")
+        pass
 
 
     def add_record(self, record):
@@ -49,14 +47,6 @@ class Provider:
         pass
 
     # Supporting Methods
-
-    def get_zone_id(self, domain_name="example.com"):
-        # i feel like looping is silly, but ok, maybe you
-        # have 5k domains and we need to paginate them.
-        for zone in self.connection.list_hosted_zones():
-            if domain_name in zone.name:
-                return zone.id
-
     def parse_record(self, entry):
          methods = {'A': self.create_a_record,
                    'CNAME': self.create_cname_record,
