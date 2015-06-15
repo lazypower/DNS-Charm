@@ -7,20 +7,16 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.environ['CHARM_DIR'],
 from charmhelpers.core.hookenv import config
 from common import sanity_check, load_class
 
-#from bind.provider import BindProvider
-
-
 class ConfigChanged(object):
 
     def __init__(self):
         if not sanity_check():
             return 0
-        self.config = config()
 
-        class_string = "{}.provider.Provider".format(self.config['provider'])
+        class_string = "{}.provider.Provider".format(config('provider'))
         provider = load_class(class_string)
-        p = provider()
-        p.config_changed(self.config['domain'])
+        p = provider(config('domain'))
+        p.config_changed()
 
 if __name__ == '__main__':
     c = ConfigChanged()
