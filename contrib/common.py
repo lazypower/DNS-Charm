@@ -95,6 +95,7 @@ def provider_keys():
     # load the keys into an array for iteration
     pkeys = conf['provider_keys'].split(' ')
     for k in pkeys:
+        if not k: continue
         provider_config[k.split('|')[0]] = k.split('|')[1]
     return provider_config
 
