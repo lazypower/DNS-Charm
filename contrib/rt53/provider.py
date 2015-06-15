@@ -11,7 +11,7 @@ class Provider:
         if not key or not secret:
             pkey = provider_keys()
             key = pkey['AWS_ACCESS_KEY_ID']
-            secret = pkey['AWS_SECRET_KEY']
+            secret = pkey['AWS_SECRET_ACCESS_KEY']
 
         self.connection = route53.connection.Route53Connection(
                 aws_access_key_id=key,
@@ -21,7 +21,9 @@ class Provider:
 
 
     def config_changed(self):
-        pass
+        if not self.zone.id:
+            raise ValueError("Missing ZoneID for Domain. Is domain declared"
+                             " in AWS Route53?")
 
 
     def add_record(self, record):
