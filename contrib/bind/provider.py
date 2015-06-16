@@ -27,7 +27,9 @@ class Provider(object):
         if type(record) is dict:
             zp.dict_to_zone(record)
         elif type(record) is list:
-            zp.array_to_zone(record)
+            #zp.array_to_zone(record)
+            for r in record:
+                zp.dict_to_zone(r)
         else:
             raise TypeError("Unsupported type for resource %d" % type(record))
         zp.save()
