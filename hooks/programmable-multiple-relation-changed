@@ -8,6 +8,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.environ['CHARM_DIR'],
 
 from charmhelpers.core.hookenv import (
     config,
+    log,
     unit_get,
     relation_get,
     relation_set,
@@ -28,10 +29,12 @@ class ProgrammableChanged(object):
         self.add_resource()
 
     def add_resource(self):
-        domain = relation_get('domain')
-        # Do nothing if we didn't receive a RR to process
         if not relation_get('resources'):
+            log("No rr sent on the wire. Doing nothing. You may need to remove"
+                " and re-add the relationship to trigger this hook again.")
             return
+
+        domain = relation_get('domain')
 
         resources = json.loads(relation_get('resources'))
         if not domain:

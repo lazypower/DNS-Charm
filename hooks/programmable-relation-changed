@@ -23,6 +23,8 @@ class ProgrammableChanged(object):
         relid = relation_id()
         relation_set(relid,
                      {'public-address': getip(unit_get('public-address'))})
+        if not relation_get('domain'):
+            return
         self.add_resource()
 
     def add_resource(self):
