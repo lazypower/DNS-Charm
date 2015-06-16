@@ -1,0 +1,14 @@
+dns-test:
+  services:
+    dns:
+      charm: local:trusty/dns
+      options:
+        provider_keys: AWS_ACCESS_KEY_ID|XXXX  AWS_SECRET_ACCESS_KEY|XXXX
+        provider: rt53
+    dtest:
+      charm: local:trusty/dtest
+  relations:
+    - ["dns:programmable", "dtest:programmable"]
+    - ["dns:programmable-multiple", "dtest:programmable-multiple"]
+  series: trusty
+
