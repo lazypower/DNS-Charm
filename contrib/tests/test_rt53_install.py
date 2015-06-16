@@ -14,7 +14,8 @@ class TestRt53Installer():
 
     @patch('common.config')
     def test_install_pip_command(self, cfgmock):
-        cfgmock.return_value = {'provider_keys': 'AWS_ACCESS_KEY|123 AWS_SECRET_KEY|abc'}
+        cfgmock.return_value = {'provider_keys':
+                            'AWS_ACCESS_KEY_ID|123 AWS_SECRET_ACCESS_KEY|abc'}
         with patch('rt53.install.subprocess') as spmock:
             spmock.check_call.return_value.returncode = 0
             install.install()
