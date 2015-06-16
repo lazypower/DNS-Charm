@@ -4,7 +4,7 @@ from boto import route53
 class Provider:
 
     # Primary Interface Methods
-    ALLOWED_RECORDS = ['A', 'CNAME', 'NS', 'SRV']
+    ALLOWED_RECORDS = ['A', 'CNAME', 'NS', 'SRV', 'NAPTR']
 
 
     def __init__(self, domain, key=None, secret=None):
@@ -35,18 +35,21 @@ class Provider:
                 self.parse_record(r, resource)
 
 
-    def remove_record(self):
+    def remove_record(self, record):
         """
         Used to remove an entry from a zone
         """
         pass
 
 
-    def update_record(self):
-        """
-        Used to update an entry in a zone
-        """
-        pass
+    def update_record(self, record):
+        resource = route53.record.ResourceRecordSets(self.client, self.zone.id)
+        if type(record) is dict:
+           # single record
+           self.parse_record(record, resource)
+        if type(record) is list:
+            for r in record:
+                self.parse_record(r, resource)
 
     # Supporting Methods
     def parse_record(self, entry, resource):
