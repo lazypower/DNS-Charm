@@ -5,8 +5,8 @@ import sys
 
 hooks = hookenv.Hooks()
 
-@hooks.hook('public-website-relation-changed')
-def website_changed():
+@hooks.hook('public-website-relation-departed')
+def website_departed():
     relid = hookenv.relation_id()
 
     if not hookenv.relation_get('public-address'):
@@ -17,16 +17,16 @@ def website_changed():
     reldata = hookenv.relation_for_unit()
     unitkey = reldata['__unit__'].replace('/', '-')
 
-    proxy_data = {'public-address': hookenv.relation_get('public-address'),
-                  'port': hookenv.relation_get('port')}
-
     with open('proxy-hosts.json', 'r') as f:
         proxy_hosts = json.loads(f.read())
 
-    proxy_hosts[unitkey] = proxy_data
+    proxy_hosts.pop(unitkey, None)
 
     with open('proxy-hosts.json', 'w+') as f:
         f.write(json.dumps(proxy_hosts))
+
+    # TODO: trigger the re-evaluation of the json parsing, and transmission
+    # of DNS data back to the upstream DNS provider.
 
 
 if __name__ == '__main__':
