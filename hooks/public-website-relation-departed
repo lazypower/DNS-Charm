@@ -17,12 +17,12 @@ def website_departed():
     reldata = hookenv.relation_for_unit()
     unitkey = reldata['__unit__'].replace('/', '-')
 
-    with open('proxy-hosts.json', 'r') as f:
+    with open('data/proxy-hosts.json', 'r') as f:
         proxy_hosts = json.loads(f.read())
 
     proxy_hosts.pop(unitkey, None)
 
-    with open('proxy-hosts.json', 'w+') as f:
+    with open('data/proxy-hosts.json', 'w+') as f:
         f.write(json.dumps(proxy_hosts))
 
     # TODO: trigger the re-evaluation of the json parsing, and transmission
