@@ -1,0 +1,47 @@
+#!/usr/bin/env python
+
+import json
+import os
+import sys
+
+sys.path.append(os.path.abspath(os.path.join(os.environ['CHARM_DIR'],
+                'contrib')))
+
+from charmhelpers.core import hookenv
+
+from consul_client import ConsulClient
+from common import unserialize_data, serialize_data
+
+hooks = hookenv.Hooks()
+
+@hooks.hook('consul-relation-changed')
+def consul_changed():
+    if not hookenv.relation_get('port'):
+        print "Missing relation data 'port' - Exiting until present"
+        return
+
+    c = ConsulClient(hookenv.relation_get('private-address'))
+    c.cache_host()
+    c.cache_services()
+
+    # if we have a public-website relation, we can make DNS entries
+    if len(hookenv.relations_of_type('public-website')) > 0:
+        print "Found public-website relation, generating dns template"
+        webhead_data = unserialize_data('data/proxy-hosts.json')
+        generate_programmable_multiple(proxy_data, c.read_services())
+
+def generate_programmable_multiple(proxy_data, service_data):
+    all_services = []
+    # iterate through each webhead, and generate service configs
+    for proxy in proxy_data:
+        # for each service, attach to a webhead proxy, and generate a DNS
+        # data structure
+        for service in service_data:
+            dns_entry = {'rr': 'A', 'alias': service, 'ttl': 60,
+                         'address': proxy_data[proxy]['public-address']}
+            all_services.append(dns_entry)
+
+    log("Calling provider with service data: {}".format(all_services))
+
+if __name__ == "__main__":
+    hooks.execute(sys.argv)
