@@ -93,8 +93,7 @@ class TestCommon(unittest.TestCase):
 
     @patch('common.config')
     def test_provider_keys(self, cfgmock):
-        cfgmock.return_value = { 'provider_keys':
-                                 'awsKey|12345 awsSecret|abc123def' }
+        cfgmock.return_value = 'awsKey|12345 awsSecret|abc123def'
         keys = common.provider_keys()
         self.assertEqual(keys['awsKey'], '12345')
         self.assertEqual(keys['awsSecret'], 'abc123def')
