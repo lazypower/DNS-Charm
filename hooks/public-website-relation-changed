@@ -1,0 +1,34 @@
+#!/usr/bin/env python
+from charmhelpers.core import hookenv
+import json
+import sys
+
+hooks = hookenv.Hooks()
+
+@hooks.hook('public-website-relation-changed')
+def website_changed():
+    pub_proxy = {}
+    relid = hookenv.relation_id()
+
+    if not hookenv.relation_get('public-address'):
+        log("Relationship incomplete, missing public-address. Exiting")
+        return
+
+    # grab an object of the relationship
+    reldata = hookenv.relation_for_unit()
+    unitkey = reldata['__unit__'].replace('/', '-')
+
+    proxy_data = {'public-address': hookenv.relation_get('public-address'),
+                  'port': hookenv.relation_get('port')}
+
+    with open('proxy-hosts.json', 'r') as f:
+        proxy_hosts = json.loads(f.read())
+
+    proxy_hosts[unitkey] = proxy_data
+
+    with open('proxy-hosts.json', 'w+') as f:
+        f.write(json.dumps(proxy_hosts))
+
+
+if __name__ == '__main__':
+  hooks.execute(sys.argv)

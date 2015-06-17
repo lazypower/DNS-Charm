@@ -14,3 +14,8 @@ provides:
     interface: dns-multi
   auto-generated:
     interface: dns-auto
+requires:
+  consul:
+      interface: consul
+  public-website:
+      interface: public-http
