@@ -13,9 +13,9 @@ def install():
         raise IOError("Missing rt53-requirements.txt")
 
     # validate that we have credentials as a preliminary sanity check
-    keys = provider_keys()
-    if not 'AWS_ACCESS_KEY_ID' in keys or not 'AWS_SECRET_ACCESS_KEY' in keys:
-        raise ValueError("Missing provider API keys: AWS_ACCESS_KEY_ID or"
-                          " AWS_SECRET_ACCESS_KEY")
-
-
+    try:
+        provider_keys()
+    except ValueError:
+        print "Missing provider API keys: AWS_ACCESS_KEY_ID or" \
+                          " AWS_SECRET_ACCESS_KEY"
+        print "config-changed will fail... incoming failure in 3..2..."
