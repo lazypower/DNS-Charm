@@ -28,20 +28,22 @@ def consul_changed():
     if len(hookenv.relations_of_type('public-website')) > 0:
         print "Found public-website relation, generating dns template"
         webhead_data = unserialize_data('data/proxy-hosts.json')
-        generate_programmable_multiple(proxy_data, c.read_services())
+        dns_data = c.build_dns(webhead_data)
 
-def generate_programmable_multiple(proxy_data, service_data):
-    all_services = []
-    # iterate through each webhead, and generate service configs
-    for proxy in proxy_data:
-        # for each service, attach to a webhead proxy, and generate a DNS
-        # data structure
-        for service in service_data:
-            dns_entry = {'rr': 'A', 'alias': service, 'ttl': 60,
-                         'address': proxy_data[proxy]['public-address']}
-            all_services.append(dns_entry)
+        push_data_to_dns(dns_data)
 
-    log("Calling provider with service data: {}".format(all_services))
+        web_relation = hookenv.relations_of_type('public-website')
+        for rel in web_relation:
+            hookenv.relation_set(rel['__relid__'], {'dns-data': dns_data})
+
+
+def push_data_to_dns(rel_data):
+    # push data to DNS provider
+    class_string = "{}.provider.Provider".format(hookenv.config('provider'))
+    provider = load_class(class_string)
+    p = provider(hookenv.config('domain'))
+    p.add_record(rel_data)
+ 
 
 if __name__ == "__main__":
     hooks.execute(sys.argv)
