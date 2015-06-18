@@ -74,6 +74,12 @@ A higly configurable interface to pass single/multiple records to the DNS host. 
     sprout-1 604800 IN A 10.0.10.254
     
 
+> Note: this will be moving to a JSON datastructure in the near future. Parsing
+> an array of strings when integrating with providers other than bind is not
+> trivial, and the itnerfaces should expect consistent data.
+> The Array notation will only be supported by the bind provider until the
+> 1.0 release, when backword compatability is broken.
+
 ## Known Limitations and Issues
 
 The charm in it's current form does not support scale out operations. It's engineered towards a single Bind9 Authoritative master deployment for use in offline environments. 

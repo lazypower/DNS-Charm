@@ -82,3 +82,23 @@ def load_class(full_class_string):
 
     module = importlib.import_module(module_path)
     return getattr(module, class_str)
+
+def provider_keys(conf=None):
+    """
+    load the space separated key/value pairs and return a dictionary
+    args of conf for easy stub in unit-tests
+    """
+    if not conf:
+        conf = config()
+
+    if not conf['provider_keys']:
+        raise ValueError("Missing required config value for provider_keys")
+
+    provider_config = {}
+    # load the keys into an array for iteration
+    pkeys = conf['provider_keys'].split(' ')
+    for k in pkeys:
+        if not k: continue
+        provider_config[k.split('|')[0]] = k.split('|')[1]
+    return provider_config
+

@@ -6,3 +6,4 @@ Gemfile
 Gemfile*
 Guard*
 .tox
+.venv

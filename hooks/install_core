@@ -32,7 +32,9 @@ class Install(object):
         # TODO: Check offline, install fatpack
         if config()['offline'] is False:
             apt_update(fatal=True)
-            apt_install(packages=['python-pip'], fatal=True)
+            apt_install(packages=['python-pip',
+                                  'libxml2-dev',
+                                  'libxslt-dev'], fatal=True)
 
             subprocess.call(['pip', 'install', '-r', 'contrib/requirements.txt',
                              '--upgrade'])
@@ -45,9 +47,13 @@ class Install(object):
     # information from there.
 
     def install_provider(self):
-        if config()['provider'] == 'bind':
-            provider = load_module("{}.install.install".format(config()['provider']))
-            provider.install()
+        self.config = config()
+
+        # something is weird here, its trimming the last bit off of the module.
+        class_string = "{}.install.install".format(self.config['provider'])
+        provider = load_module(class_string)
+        provider.install()
+
 
 if __name__ == '__main__':
     i = Install()

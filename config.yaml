@@ -11,3 +11,7 @@ options:
     type: boolean
     default: false
     description: "Specify offline env configuration, and install from local filepath instead of via apt"
+  provider_keys:
+    type: string
+    default:
+    description: "Space separated key/values denoted with a pipe character. eg: apikey|1234 apisecret|abcd"
