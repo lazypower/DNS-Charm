@@ -1,0 +1,62 @@
+#!/usr/bin/env python
+from charmhelpers.core import hookenv
+import json
+import os
+import sys
+
+sys.path.append(os.path.abspath(os.path.join(os.environ['CHARM_DIR'],
+                'contrib')))
+
+from common import serialize_data, unserialize_data, load_class
+from consul_client import ConsulClient
+
+hooks = hookenv.Hooks()
+
+@hooks.hook('public-website-relation-changed')
+def website_changed():
+    relid = hookenv.relation_id()
+
+    if not hookenv.relation_get('public-address'):
+        log("Relationship incomplete, missing public-address. Exiting")
+        return
+
+    serialize_proxy_data()
+    domain = hookenv.config('domain')
+    hookenv.relation_set(relid, {'domain': domain})
+
+
+    consul_relations = hookenv.relations_of_type('consul')
+    if len(consul_relations) > 0:
+        rel_data = action_on_consul_service_data()
+        hookenv.relation_set(relid, {'dns-data': rel_data})
+
+def serialize_proxy_data():
+    # grab an object of the relationship
+    reldata = hookenv.relation_for_unit()
+    # no slashes in our names
+    unitkey = reldata['__unit__'].replace('/', '-')
+
+    # build the config object for cache
+    proxy_data = {'public-address': hookenv.relation_get('public-address'),
+                  'port': hookenv.relation_get('port')}
+
+    proxy_hosts = unserialize_data('data/proxy-hosts.json')
+    proxy_hosts[unitkey] = proxy_data
+    serialize_data('data/proxy-hosts.json', proxy_hosts)
+
+
+def action_on_consul_service_data():
+    print "Discovered consul-relationship, reacting to found data"
+    client = ConsulClient(filepath='data/consul-host.json')
+    rel_data = client.build_dns(unserialize_data('data/proxy-hosts.json'))
+
+    # push data to DNS provider
+    class_string = "{}.provider.Provider".format(hookenv.config('provider'))
+    provider = load_class(class_string)
+    p = provider(hookenv.config('domain'))
+    p.add_record(rel_data)
+
+    return rel_data
+
+if __name__ == '__main__':
+    hooks.execute(sys.argv)

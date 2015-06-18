@@ -1,4 +1,5 @@
 import importlib
+import json
 import os
 import subprocess
 from charmhelpers.core.hookenv import (
@@ -83,22 +84,35 @@ def load_class(full_class_string):
     module = importlib.import_module(module_path)
     return getattr(module, class_str)
 
-def provider_keys(conf=None):
+def provider_keys():
     """
     load the space separated key/value pairs and return a dictionary
     args of conf for easy stub in unit-tests
     """
-    if not conf:
-        conf = config()
-
-    if not conf['provider_keys']:
+    if not config('provider_keys'):
         raise ValueError("Missing required config value for provider_keys")
 
     provider_config = {}
     # load the keys into an array for iteration
-    pkeys = conf['provider_keys'].split(' ')
+    pkeys = config('provider_keys').split(' ')
     for k in pkeys:
         if not k: continue
         provider_config[k.split('|')[0]] = k.split('|')[1]
     return provider_config
 
+def serialize_data(datafile, data):
+    from path import Path
+    p = Path(datafile)
+    p.dirname().mkdir_p()
+
+    with open(p, 'w+') as f:
+        f.write(json.dumps(data))
+
+def unserialize_data(datafile):
+    from path import Path
+    p = Path(datafile)
+    if p.exists():
+        with open(p, 'r') as f:
+            return json.loads(f.read())
+    else:
+        return {}
