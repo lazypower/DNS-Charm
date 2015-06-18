@@ -72,7 +72,7 @@ A higly configurable interface to pass single/multiple records to the DNS host. 
     sprout  604800 IN NAPTR 1 1 "S" "SIP+D2T" "" _sip._tcp.sprout
     _sip._tcp.sprout 604800 IN SRV 0 0 5054 sprout-1
     sprout-1 604800 IN A 10.0.10.254
-    
+
 
 > Note: this will be moving to a JSON datastructure in the near future. Parsing
 > an array of strings when integrating with providers other than bind is not
@@ -94,6 +94,7 @@ None of the 3rd party provider support has been added save for the provider arch
 
 **provider**: Specify the underlying provider. Defaults to **bind** 
 
+**proivider_keys**: Used to warehouse provider specific configuration. For an example usecase, see the [rt53](contrib/rt53/README.md) docs.
 
 # Contact Information
 
