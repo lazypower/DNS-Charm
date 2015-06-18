@@ -10,7 +10,7 @@ sys.path.append(os.path.abspath(os.path.join(os.environ['CHARM_DIR'],
 from charmhelpers.core import hookenv
 
 from consul_client import ConsulClient
-from common import unserialize_data, serialize_data
+from common import unserialize_data, serialize_data, load_class
 
 hooks = hookenv.Hooks()
 
