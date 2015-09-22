@@ -1,6 +1,6 @@
 # DNS As A Service
 
-[![Build Status](https://drone.io/github.com/chuckbutler/DNS-Charm/status.png)](https://drone.io/github.com/chuckbutler/DNS-Charm/latest)
+[![Build Status](http://drone.systemzoo.org/api/badge/github.com/chuckbutler/DNS-Charm/status.svg?branch=master)](http://drone.systemzoo.org/github.com/chuckbutler/DNS-Charm)
 
 ## Overview
 
