@@ -209,6 +209,14 @@ class ZoneParser(object):
     def update_soa(self, data):
         self.zone.soa(data)
 
+    def update_srv(self, data):
+        self.zone.srv(data)
+
+    def update_naptr(self, data):
+        self.zone.naptr(data)
+
+
+
     # see tests/fixtures/db.orangebox.com for expected format.
     # As this is handled by the Jinja template, it shouldn't change much.
     def soa_from_array(self, data):
@@ -265,7 +273,10 @@ class ZoneParser(object):
         methods = {'A': self.update_a,
                    'CNAME': self.update_cname,
                    'SOA': self.update_soa,
-                   'NS': self.update_ns}
+                   'SRV': self.update_srv,
+                   'NS': self.update_ns,
+                   'NAPTR': self.update_naptr,
+       }
         if 'rr' in record.keys():
             try:
                 methods[record['rr']](record)

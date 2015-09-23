@@ -43,8 +43,8 @@ class Provider(object):
 
     def first_setup(self, parser):
         # Insert SOA and NS records
-        hostname = unit_get('public-address')
-        addr = resolve_hostname_to_ip(hostname)
+        addr = unit_get('public-address')
+        #addr = resolve_hostname_to_ip(hostname)
         parser.dict_to_zone({'rr': 'SOA',
                              'addr': 'ns.%s.' % self.domain,
                              'owner': 'root.%s.' % self.domain,

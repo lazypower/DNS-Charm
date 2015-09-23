@@ -3,7 +3,7 @@
 set -eu
 
 easy_install pip
-pip install charmhelpers jinja2
+pip install charmhelpers jinja2 pydns
 
 hooks/install_core
 
