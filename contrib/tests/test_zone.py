@@ -141,10 +141,10 @@ class TestZone(unittest.TestCase):
         z.read_template = Mock()
         z.read_template.return_value = "hi {{data}}"
         z.to_file()
-        z.read_template.assert_called_once()
+        z.read_template.assert_called_once_with()
         mopen.assert_called_with('/etc/bind/db.example.com', 'w')
         tm.assert_called_with(data={'SOA': [], 'AAAA': [], 'TXT': [],
-          'PTR': [], 'SPF': [], 'A': [], 'CERT': [], 'CNAME': [], 'SRV': [],
+          'PTR': [], 'SPF': [], 'A': [], 'CERT': [], 'CNAME': [], 'SRV': [],  # noqa
           'CAA': [], 'NS': [], 'NAPTR': []})
 
     @patch.dict('os.environ', {'CHARM_DIR': '/tmp/foo'})

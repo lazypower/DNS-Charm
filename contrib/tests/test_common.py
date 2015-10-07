@@ -18,7 +18,6 @@ class TestCommon(unittest.TestCase):
         cfgmock.return_value = {'assume_provider': True,
                                 'domain': 'example.com'}
         self.assertTrue(common.sanity_check())
-        cfgmock.assert_called_once(common.sanity_check())
 
     @patch('common.config')
     @patch('common.log')
@@ -26,7 +25,6 @@ class TestCommon(unittest.TestCase):
         cfgmock.return_value = {'assume_provider': True,
                                 'domain': ''}
         self.assertFalse(common.sanity_check())
-        cfgmock.assert_called_once(common.sanity_check())
 
     @patch('builtins.open' if sys.version_info > (3,) else '__builtin__.open')
     def test_existing_nameservers(self, omck):

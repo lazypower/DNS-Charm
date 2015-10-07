@@ -171,7 +171,7 @@ sprout-0 300 IN A 10.0.5.1""".split('\n')
         zp.save()
         osrm.assert_called_with('/etc/bind/db.example.com.proposed')
         fwm.assert_called_with('/etc/bind/db.example.com')
-        zp.add_to_local_zones.assert_called_once()
+        zp.add_to_local_zones.assert_called_once_with()
 
     def test_find_type(self):
         zp = ZoneParser('example.com')

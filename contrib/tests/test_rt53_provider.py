@@ -4,6 +4,8 @@ import os
 
 from rt53 import provider
 
+
+
 class TestRt53Provider():
     """
     This test suite depends on cloud credentials. You can ideally set them to
@@ -23,7 +25,8 @@ class TestRt53Provider():
         AWS_SECRET_ACCESS_KEY = os.getenv('AWS_SECRET_ACCESS_KEY')
         cls.provider = provider.Provider('example.com', AWS_ACCESS_KEY, AWS_SECRET_ACCESS_KEY)
 
-
+    @pytest.mark.skipif(os.getenv('AWS_ACCESS_KEY_ID') is None,
+                        reason="requires credentials")
     @patch('rt53.provider.route53.record.ResourceRecordSets')
     def test_add_record_with_dict(self, rrm):
         record = {'name': 'test', 'rr': 'A', 'ttl': 1600}
@@ -35,9 +38,11 @@ class TestRt53Provider():
     @patch('rt53.provider.Provider.create_cname_record')
     @patch('rt53.provider.Provider.create_ns_record')
     @patch('rt53.provider.Provider.create_srv_record')
+    @pytest.mark.skipif(os.getenv('AWS_ACCESS_KEY_ID') is None,
+                        reason="requires credentials")
     def test_add_record_with_empty_dict_raises_error(self, amk, cmk, nmk, smk):
         record = {'name': 'test', 'ttl': 1600}
-        with  pytest.raises(ValueError):
+        with pytest.raises(ValueError):
             self.provider.add_record(record)
             record = {}
             self.provider.add_record(record)
@@ -46,21 +51,11 @@ class TestRt53Provider():
         assert nmk.not_called()
         assert smk.not_called()
 
-
+    @pytest.mark.skipif(os.getenv('AWS_ACCESS_KEY_ID') is None,
+                        reason="requires credentials")
     def test_create_a_record(self):
         record = {'alias': 'test', 'ttl': 1600, 'rr': 'A', 'addr': '127.0.0.1'}
         with patch('boto.route53.record.ResourceRecordSets') as crm:
             self.provider.create_a_record(record, crm)
             crm.add_change.assert_called_with('UPSERT', 'test.example.com',
                                               'A', ttl=1600)
-
-    def test_create_cname_record(self):
-        pass
-
-    def test_create_ns_record(self):
-        pass
-
-    def test_create_srv_record(self):
-        pass
-
-
