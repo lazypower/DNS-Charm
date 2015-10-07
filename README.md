@@ -65,13 +65,10 @@ Set your associated record resource configuration variables, and expect to recei
 
 ### programmable-multiple
 
-A higly configurable interface to pass single/multiple records to the DNS host. This will expect a newline separated list of records to add that conform to the named-checkzone output. Sent over the wire as **resources**
+A higly configurable interface to pass single/multiple records to the DNS host. This will expect a json list of records to add that conform to the named-checkzone output. Sent over the wire as **resources**
 
-
-    sprout  604800 IN A 10.0.10.254
-    sprout  604800 IN NAPTR 1 1 "S" "SIP+D2T" "" _sip._tcp.sprout
-    _sip._tcp.sprout 604800 IN SRV 0 0 5054 sprout-1
-    sprout-1 604800 IN A 10.0.10.254
+ [{'alias': 'test', 'ttl': 1600, 'rr': 'A', 'addr': '127.0.0.1'},
+ {'alias': 'test2', 'ttl': 1600, 'rr': 'CNAME', 'addr': '127.0.0.1'}]
 
 
 > Note: this will be moving to a JSON datastructure in the near future. Parsing
