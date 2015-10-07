@@ -12,7 +12,7 @@ class TestBindProvider(unittest.TestCase):
     @patch('subprocess.check_output')
     @patch('bind.provider.unit_get')
     def test_first_setup(self, ugm, spcom):
-        spcom.return_value = '10.0.0.1'
+        ugm.return_value = '10.0.0.1'
         bp = Provider('example.com')
         parser = MagicMock()
         bp.first_setup(parser)
