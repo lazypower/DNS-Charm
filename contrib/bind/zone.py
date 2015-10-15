@@ -27,9 +27,6 @@ class Zone(object):
         if not value:
             return self.contents['A']
         else:
-            idx = self.find(self.contents['A'], 'alias', value['alias'])
-            if idx != -1:
-                self.contents['A'].pop(idx)
             self.contents['A'].append(value)
             return self.contents['A']
 
